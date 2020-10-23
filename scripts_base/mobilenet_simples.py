@@ -87,38 +87,3 @@ def detect(frame):
 
 
 
-
-
-import cv2
-
-if __name__ == "__main__":
-
-    #cap = cv2.VideoCapture('hall_box_battery_1024.mp4')
-    cap = cv2.VideoCapture(0)
-
-    print("Known classes")
-    print(CLASSES)
-
-    while(True):
-        # Capture frame-by-frame
-        ret, frame = cap.read()
-
-        result_frame, result_tuples = detect(frame)
-
-
-        # Display the resulting frame
-        cv2.imshow('frame',result_frame)
-
-        # Prints the structures results:
-        # Format:
-        # ("CLASS", confidence, (x1, y1, x2, y3))
-        for t in result_tuples:
-            # print(t) # Descomente para imprimir
-            pass
-
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-
-    # When everything done, release the capture
-    cap.release()
-    cv2.destroyAllWindows()
