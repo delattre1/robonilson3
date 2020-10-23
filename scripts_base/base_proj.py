@@ -20,8 +20,6 @@ from geometry_msgs.msg import Twist, Vector3, Pose, Vector3Stamped
 
 from nav_msgs.msg import Odometry
 from std_msgs.msg import Header
-
-
 import visao_module
 
 
@@ -58,55 +56,60 @@ from encontra_intersecao import slope, y_intercept, line_intersect
 sensitivity = 15
 lower_white = np.array([0, 0, 255-sensitivity])
 upper_white = np.array([255, sensitivity, 255])
-min_line_length = 30
-max_line_gap = 15
+min_line_length = 45
+max_line_gap = 18
 menor_m = 0
 maior_m = 0
 l_maior = [0]*4
 l_menor = [0]*4
 
 def plota_frame_hsv(frame):
+    #funcao que seleciona apenas a pista em branco, consigo selecionar a cor bonitinho, porem a interseção não está working 
     maior_m, menor_m = 0, 0
-
     frame_hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
     mask = cv2.inRange(frame_hsv, lower_white, upper_white)
     # aplica o detector de bordas de Canny à imagem src
     dst = cv2.Canny(mask, 200, 350)
-    # Converte a imagem para BGR para permitir desenho colorido
-    cdst = cv2.cvtColor(dst, cv2.COLOR_GRAY2BGR)
-    # houghlinesp
-    linesp = cv2.HoughLinesP(dst, 10, math.pi/180.0,
-                             100, np.array([]), min_line_length, max_line_gap)
+    try:
+        # Converte a imagem para BGR para permitir desenho colorido
+        cdst = cv2.cvtColor(dst, cv2.COLOR_GRAY2BGR)
+        # houghlinesp
+        linesp = cv2.HoughLinesP(dst, 10, math.pi/180.0,
+                                100, np.array([]), min_line_length, max_line_gap)
 
-    a, b, c = linesp.shape
-    for i in range(a):
-        l = linesp[i][0]
-        m = (l[2] - l[0]) / (l[3] - l[1])
-        if m > maior_m:
-            maior_m = m
-            l_maior = l
-        elif m < menor_m:
-            menor_m = m
-            l_menor = l
+        print(linesp)
+        a, b, c = linesp.shape
+        for i in range(a):
+            l = linesp[i][0]
+            m = (l[2] - l[0]) / (l[3] - l[1])
+            if m > maior_m:
+                maior_m = m
+                l_maior = l
+            elif m < menor_m:
+                menor_m = m
+                l_menor = l
 
-    cv2.line(cdst, (l_maior[0], l_maior[1]), (l_maior[2],
-                                              l_maior[3]), (255, 0, 255), 3, cv2.LINE_AA)
+        cv2.line(cdst, (l_maior[0], l_maior[1]), (l_maior[2],
+                                                l_maior[3]), (255, 0, 255), 3, cv2.LINE_AA)
 
-    cv2.line(cdst, (l_menor[0], l_menor[1]), (l_menor[2],
-                                              l_menor[3]), (25, 240, 255), 3, cv2.LINE_AA)
+        cv2.line(cdst, (l_menor[0], l_menor[1]), (l_menor[2],
+                                                l_menor[3]), (25, 240, 255), 3, cv2.LINE_AA)
+        
+        # p1, p2 = (l_maior[0],l_maior[1]),(l_maior[2],l_maior[3])
+        # q1, q2 = (l_menor[0],l_menor[1]),(l_menor[2],l_menor[3])
+        # m1 = slope(p1,p2)
+        # m2 = slope(q1,q2)
+        # yint_a = y_intercept(p1, m1)
+        # yint_b = y_intercept(q1,m2)
+        # ponto_de_fuga =  (line_intersect(m1, yint_a, m2, yint_b))
+        # x_fuga = int(ponto_de_fuga[0])
+        # y_fuga = int(ponto_de_fuga[1])
+        # cv2.circle(cdst, (x_fuga,y_fuga), 2, (0,0,255), 10)
+        # maior_m, menor_m = 0, 0
 
-    p1, p2 = (l_maior[0],l_maior[1]),(l_maior[2],l_maior[3])
-    q1, q2 = (l_menor[0],l_menor[1]),(l_menor[2],l_menor[3])
-    m1 = slope(p1,p2)
-    m2 = slope(q1,q2)
-    yint_a = y_intercept(p1, m1)
-    yint_b = y_intercept(q1,m2)
-    ponto_de_fuga =  (line_intersect(m1, yint_a, m2, yint_b))
-    x_fuga = int(ponto_de_fuga[0])
-    y_fuga = int(ponto_de_fuga[1])
-    cv2.circle(cdst, (x_fuga,y_fuga), 2, (0,0,255), 10)
-    maior_m, menor_m = 0, 0
-    # display
+    except: 
+        print("erro na mask da pista")
+
     cv2.imshow("nome frame tela", cdst)
 
     return None
@@ -156,14 +159,9 @@ if __name__=="__main__":
     rospy.init_node("cor")
 
     topico_imagem = "/camera/image/compressed"
-
     recebedor = rospy.Subscriber(topico_imagem, CompressedImage, roda_todo_frame, queue_size=4, buff_size = 2**24)
-
-
     print("Usando ", topico_imagem)
-
     velocidade_saida = rospy.Publisher("/cmd_vel", Twist, queue_size = 1)
-
     tfl = tf2_ros.TransformListener(tf_buffer) #conversao do sistema de coordenadas 
     tolerancia = 25
 
