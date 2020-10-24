@@ -49,18 +49,6 @@ def center_of_mass_region(mask, x1, y1, x2, y2):
     cv2.rectangle(mask_bgr, (x1, y1), (x2, y2), (255,0,0),2,cv2.LINE_AA)
     return mask_bgr
 
-def center_mass_region_road(frame_bgr, x1, y1, x2, y2):
-    low_yellow = np.array([22, 50, 50],dtype=np.uint8)
-    high_yellow = np.array([36, 255, 255],dtype=np.uint8)
-    yellow_mask = filter_color(frame_bgr,low_yellow, high_yellow)
-    clipped = yellow_mask[y1:y2, x1:x2]
-    c = center_of_mass(clipped)
-    c[0]+=x1 #não sei pq esse +=x1
-    c[1]+=y1
-    crosshair(frame_bgr, c, 20, (255,0,255)) #usa mask pra ficar colorido
-    #desanhar retangulo 
-    cv2.rectangle(frame_bgr, (x1, y1), (x2, y2), (255,0,0),2,cv2.LINE_AA)
-    return frame_bgr
 
 def seleciona_window_centro_de_massa(img_bgr):
     low_yellow, high_yellow = np.array([22, 50, 50],dtype=np.uint8), np.array([36, 255, 255],dtype=np.uint8)
@@ -71,11 +59,12 @@ def seleciona_window_centro_de_massa(img_bgr):
     x1 = img_bgr.shape[1]
     y1 = img_bgr.shape[0] - y0
     clipped = yellow_mask[y0:y1, x0:x1]
-    c = center_of_mass(clipped)
-    desenha_centro = crosshair(img_bgr, c, 20, (255,0,255))
-    cv2.rectangle(img_bgr, (x0, y0), (x1, y1), (255,0,0),2,cv2.LINE_AA)
-
-
+    try: 
+        c = center_of_mass(clipped) 
+        desenha_centro = crosshair(img_bgr, c, 20, (255,0,255))
+        cv2.rectangle(img_bgr, (x0, y0), (x1, y1), (255,0,0),2,cv2.LINE_AA) #desenha retangulo da área selecionada
+    except:
+        print('falha ao selecionar estrada')
     return img_bgr
 
 # while(True):

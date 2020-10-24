@@ -68,26 +68,8 @@ def roda_todo_frame(imagem):
     try:
         antes = time.clock()
         temp_image = bridge.compressed_imgmsg_to_cv2(imagem, "bgr8")
-
-        # low_yellow, high_yellow = np.array([22, 50, 50],dtype=np.uint8), np.array([36, 255, 255],dtype=np.uint8)
-        # yellow_mask = center_mass.filter_color(temp_image,low_yellow, high_yellow)
-        # center_mass_mask = center_mass.center_of_mass(yellow_mask)
-        # desenha_centro = center_mass.crosshair(temp_image, center_mass_mask, 20, (255,0,255))
-        # mask_estrada = center_mass.center_mass_region_road(temp_image, 20, 200, temp_image.shape[1] - 20, temp_image.shape[0]-100) # Lembrando que negativos contam a partir do fim`
-
-        # mask = center_mass.filter_color(temp_image, low_yellow, high_yellow)
-        # mask_bgr = center_mass.center_of_mass_region(mask, 20, 200, temp_image.shape[1] - 20, temp_image.shape[0]-100) # Lembrando que negativos contam a partir do fim`
-
-        # cv2.imshow("yellow mask", temp_image)
-
-        # sub_img = temp_image.copy()
-        # #shape 240, 320 (y,x)
-
-        # print(sub_img.shape[0])
-        # sub_img = sub_img[40:sub_img.shape[0]-40, :] #y:y+h, x:x+w
-        # cv2.imshow("asduhs", sub_img)
         window_selecionada = center_mass.seleciona_window_centro_de_massa(temp_image)
-        cv2.imshow("window parcial", window_selecionada)
+        cv2.imshow("Centro de massa com area selecionada", window_selecionada)
 
 
         # # Note que os resultados já são guardados automaticamente na variável
