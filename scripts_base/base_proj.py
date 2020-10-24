@@ -49,6 +49,20 @@ frame = "camera_link"
 tfl = 0
 tf_buffer = tf2_ros.Buffer()
 
+# def posicao_odometry(msg):
+#     # print(msg.pose.pose)
+#     x = msg.pose.pose.position.x
+#     y = msg.pose.pose.position.y
+
+#     quat = msg.pose.pose.orientation
+#     lista = [quat.x, quat.y, quat.z, quat.w]
+#     angulos_rad = transformations.euler_from_quaternion(lista)
+#     alfa = angulos_rad[2]
+#     angs_degree = np.degrees(angulos_rad)
+#     print("Posicao (x,y)  ({:.2f} , {:.2f}) + angulo {:.2f}".format(x, y, angs_degree[2]))
+
+
+
 # A função a seguir é chamada sempre que chega um novo frame
 def roda_todo_frame(imagem):
     print("frame")
@@ -93,8 +107,9 @@ def roda_todo_frame(imagem):
 if __name__=="__main__":
     rospy.init_node("cor")
     topico_imagem = "/camera/image/compressed"
+    # odom_sub = rospy.Subscriber("/odom", Odometry, posicao_odometry)
     recebedor = rospy.Subscriber(topico_imagem, CompressedImage, roda_todo_frame, queue_size=4, buff_size = 2**24)
-    print("Usando ", topico_imagem)
+    # print("Usando ", topico_imagem)
     velocidade_saida = rospy.Publisher("/cmd_vel", Twist, queue_size = 1)
     tfl = tf2_ros.TransformListener(tf_buffer) #conversao do sistema de coordenadas 
     tolerancia = 25

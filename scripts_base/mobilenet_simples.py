@@ -38,7 +38,6 @@ net = cv2.dnn.readNetFromCaffe(proto, model)
 # (note: normalization is done via the authors of the MobileNet SSD
 # implementation)
 
-
 def detect(frame):
     image = frame.copy()
     (h, w) = image.shape[:2]
@@ -84,6 +83,78 @@ def detect(frame):
     # show the output image
     return image, results
 
+#seleciona só person, usar de base depois 
+#
+# def detect(frame, contador):
+#     image = frame.copy()
+#     (h, w) = image.shape[:2]
+#     blob = cv2.dnn.blobFromImage(cv2.resize(image, (300, 300)), 0.007843, (300, 300), 127.5)
+
+#     # pass the blob through the network and obtain the detections and
+#     # predictions
+#     # print("[INFO] computing object detections...")
+#     net.setInput(blob)
+#     detections = net.forward()
+#     results = []
+
+#     # loop over the detections
+#     for i in np.arange(0, detections.shape[2]):
+#         confidence = detections[0, 0, i, 2]
+#         if confidence > args["confidence"]:
+#             # extract the index of the class label from the `detections`,
+#             # then compute the (x, y)-coordinates of the bounding box for
+#             idx = int(detections[0, 0, i, 1])
+#             box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
+#             (startX, startY, endX, endY) = box.astype("int")
+#             # display the prediction
+#             label = "{}: {:.2f}%".format(CLASSES[idx], confidence * 100)
+#             # print("[INFO] {}".format(label))
+#             if CLASSES[idx] == "person":
+#                 contador += 1
+#                 print(f'Contador frame: {contador}')
+
+#             else:
+#                 contador = 0
+#                 print("\n")
+
+#             if contador >= 5:
+#                 cv2.rectangle(image, (startX, startY), (endX, endY),
+#                     COLORS[idx], 2)
+#                 y = startY - 15 if startY - 15 > 15 else startY + 15
+#                 cv2.putText(image, label, (startX, y),
+#                     cv2.FONT_HERSHEY_SIMPLEX, 0.5, COLORS[idx], 2)
+
+#                 results.append((CLASSES[idx], confidence*100, (startX, startY),(endX, endY) ))
+#     # show the output image
+#     return image, results, contador
+
+
+#     #cap = cv2.VideoCapture('hall_box_battery_1024.mp4')
+# cap = cv2.VideoCapture(0)
+
+# # print("Known classes")
+# # print(CLASSES)
+
+# while(True):
+#     # Capture frame-by-frame
+#     ret, frame = cap.read()
+#     result_frame, result_tuples, contador = detect(frame, contador)
+#     # Display the resulting frame
+#     cv2.imshow('frame',result_frame)
+
+#     # Prints the structures results:
+#     # Format:
+#     # ("CLASS", confidence, (x1, y1, x2, y3))
+#     for t in result_tuples:
+#         # print(t)
+#         continue
+
+#     if cv2.waitKey(1) & 0xFF == ord('q'):
+#         break
+
+# # When everything done, release the capture
+# cap.release()
+# cv2.destroyAllWindows()
 
 
 

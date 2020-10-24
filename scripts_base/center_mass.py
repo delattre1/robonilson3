@@ -49,7 +49,6 @@ def center_of_mass_region(mask, x1, y1, x2, y2):
     cv2.rectangle(mask_bgr, (x1, y1), (x2, y2), (255,0,0),2,cv2.LINE_AA)
     return mask_bgr
 
-
 def seleciona_window_centro_de_massa(img_bgr):
     low_yellow, high_yellow = np.array([22, 50, 50],dtype=np.uint8), np.array([36, 255, 255],dtype=np.uint8)
     yellow_mask = filter_color(img_bgr, low_yellow, high_yellow)
@@ -57,15 +56,31 @@ def seleciona_window_centro_de_massa(img_bgr):
     x0 = 0
     y0 = 40
     x1 = img_bgr.shape[1]
+    print('é a metade: []{}'.format(x1/2))
     y1 = img_bgr.shape[0] - y0
     clipped = yellow_mask[y0:y1, x0:x1]
     try: 
         c = center_of_mass(clipped) 
         desenha_centro = crosshair(img_bgr, c, 20, (255,0,255))
         cv2.rectangle(img_bgr, (x0, y0), (x1, y1), (255,0,0),2,cv2.LINE_AA) #desenha retangulo da área selecionada
+        print(c)
+        print("")
+
+        rotacao_conforme_centro_pista(c)
     except:
         print('falha ao selecionar estrada')
     return img_bgr
+
+def rotacao_conforme_centro_pista(centro_massa):
+    x_centro = centro_massa[0]
+    incerteza = 10
+    centro = 160
+    if x_centro < centro - incerteza: #meio é 160
+        print("tem que girar pra esquerda (+vel_ang)")
+    elif x_centro > centro + incerteza:
+        print("tem que virar pra direita (-vel ang) ")
+    
+    return None
 
 # while(True):
 #     # Capture frame-by-frame
