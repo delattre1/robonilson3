@@ -23,14 +23,15 @@ from std_msgs.msg import Header
 import visao_module
 
 
+#usar mask para chão amarelo
+import center_mass
+
 bridge = CvBridge()
 
 cv_image = None
 media = []
 centro = []
 atraso = 1.5E9 # 1 segundo e meio. Em nanossegundos
-
-
 area = 0.0 # Variavel com a area do maior contorno
 
 # Só usar se os relógios ROS da Raspberry e do Linux desktop estiverem sincronizados. 
@@ -38,7 +39,6 @@ area = 0.0 # Variavel com a area do maior contorno
 check_delay = False 
 
 resultados = [] # Criacao de uma variavel global para guardar os resultados vistos
-
 x = 0
 y = 0
 z = 0 
@@ -46,73 +46,8 @@ id = 0
 
 frame = "camera_link"
 # frame = "head_camera"  # DESCOMENTE para usar com webcam USB via roslaunch tag_tracking usbcam
-
 tfl = 0
-
 tf_buffer = tf2_ros.Buffer()
-
-#variaveis e import relacionados a plota frame_hsv
-from encontra_intersecao import slope, y_intercept, line_intersect
-sensitivity = 15
-lower_white = np.array([0, 0, 255-sensitivity])
-upper_white = np.array([255, sensitivity, 255])
-min_line_length = 45
-max_line_gap = 18
-menor_m = 0
-maior_m = 0
-l_maior = [0]*4
-l_menor = [0]*4
-
-def plota_frame_hsv(frame):
-    #funcao que seleciona apenas a pista em branco, consigo selecionar a cor bonitinho, porem a interseção não está working 
-    maior_m, menor_m = 0, 0
-    frame_hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-    mask = cv2.inRange(frame_hsv, lower_white, upper_white)
-    # aplica o detector de bordas de Canny à imagem src
-    dst = cv2.Canny(mask, 200, 350)
-    try:
-        # Converte a imagem para BGR para permitir desenho colorido
-        cdst = cv2.cvtColor(dst, cv2.COLOR_GRAY2BGR)
-        # houghlinesp
-        linesp = cv2.HoughLinesP(dst, 10, math.pi/180.0,
-                                100, np.array([]), min_line_length, max_line_gap)
-
-        print(linesp)
-        a, b, c = linesp.shape
-        for i in range(a):
-            l = linesp[i][0]
-            m = (l[2] - l[0]) / (l[3] - l[1])
-            if m > maior_m:
-                maior_m = m
-                l_maior = l
-            elif m < menor_m:
-                menor_m = m
-                l_menor = l
-
-        cv2.line(cdst, (l_maior[0], l_maior[1]), (l_maior[2],
-                                                l_maior[3]), (255, 0, 255), 3, cv2.LINE_AA)
-
-        cv2.line(cdst, (l_menor[0], l_menor[1]), (l_menor[2],
-                                                l_menor[3]), (25, 240, 255), 3, cv2.LINE_AA)
-        
-        # p1, p2 = (l_maior[0],l_maior[1]),(l_maior[2],l_maior[3])
-        # q1, q2 = (l_menor[0],l_menor[1]),(l_menor[2],l_menor[3])
-        # m1 = slope(p1,p2)
-        # m2 = slope(q1,q2)
-        # yint_a = y_intercept(p1, m1)
-        # yint_b = y_intercept(q1,m2)
-        # ponto_de_fuga =  (line_intersect(m1, yint_a, m2, yint_b))
-        # x_fuga = int(ponto_de_fuga[0])
-        # y_fuga = int(ponto_de_fuga[1])
-        # cv2.circle(cdst, (x_fuga,y_fuga), 2, (0,0,255), 10)
-        # maior_m, menor_m = 0, 0
-
-    except: 
-        print("erro na mask da pista")
-
-    cv2.imshow("nome frame tela", cdst)
-
-    return None
 
 # A função a seguir é chamada sempre que chega um novo frame
 def roda_todo_frame(imagem):
@@ -134,30 +69,47 @@ def roda_todo_frame(imagem):
         antes = time.clock()
         temp_image = bridge.compressed_imgmsg_to_cv2(imagem, "bgr8")
 
-        # Note que os resultados já são guardados automaticamente na variável
-        # chamada resultados
-        centro, saida_net, resultados =  visao_module.processa(temp_image)        
-        for r in resultados:
-            # print(r) - print feito para documentar e entender
-            # o resultado            
-            pass
+        # low_yellow, high_yellow = np.array([22, 50, 50],dtype=np.uint8), np.array([36, 255, 255],dtype=np.uint8)
+        # yellow_mask = center_mass.filter_color(temp_image,low_yellow, high_yellow)
+        # center_mass_mask = center_mass.center_of_mass(yellow_mask)
+        # desenha_centro = center_mass.crosshair(temp_image, center_mass_mask, 20, (255,0,255))
+        # mask_estrada = center_mass.center_mass_region_road(temp_image, 20, 200, temp_image.shape[1] - 20, temp_image.shape[0]-100) # Lembrando que negativos contam a partir do fim`
 
-        depois = time.clock()
-        # Desnecessário - Hough e MobileNet já abrem janelas
-        cv_image = saida_net.copy()
+        # mask = center_mass.filter_color(temp_image, low_yellow, high_yellow)
+        # mask_bgr = center_mass.center_of_mass_region(mask, 20, 200, temp_image.shape[1] - 20, temp_image.shape[0]-100) # Lembrando que negativos contam a partir do fim`
+
+        # cv2.imshow("yellow mask", temp_image)
+
+        # sub_img = temp_image.copy()
+        # #shape 240, 320 (y,x)
+
+        # print(sub_img.shape[0])
+        # sub_img = sub_img[40:sub_img.shape[0]-40, :] #y:y+h, x:x+w
+        # cv2.imshow("asduhs", sub_img)
+        window_selecionada = center_mass.seleciona_window_centro_de_massa(temp_image)
+        cv2.imshow("window parcial", window_selecionada)
 
 
-        plota_frame_hsv(temp_image)
+        # # Note que os resultados já são guardados automaticamente na variável
+        # # chamada resultados
+        # centro, saida_net, resultados =  visao_module.processa(temp_image)        
+        # for r in resultados:
+        #     # print(r) - print feito para documentar e entender
+        #     # o resultado            
+        #     pass
 
-
+        # depois = time.clock()
+        # # Desnecessário - Hough e MobileNet já abrem janelas
+        # cv_image = saida_net.copy()
         # cv2.imshow("cv_image", cv_image)
+
+
         cv2.waitKey(1)
     except CvBridgeError as e:
         print('ex', e)
     
 if __name__=="__main__":
     rospy.init_node("cor")
-
     topico_imagem = "/camera/image/compressed"
     recebedor = rospy.Subscriber(topico_imagem, CompressedImage, roda_todo_frame, queue_size=4, buff_size = 2**24)
     print("Usando ", topico_imagem)
@@ -170,13 +122,11 @@ if __name__=="__main__":
 
     try:
         # Inicializando - por default gira no sentido anti-horário
-        # vel = Twist(Vector3(0,0,0), Vector3(0,0,math.pi/10.0))
-        
+        vel = Twist(Vector3(0,0,0), Vector3(0,0, math.pi/10.0))
         while not rospy.is_shutdown():
             for r in resultados:
                 print(r)
-            #velocidade_saida.publish(vel)
-
+            # velocidade_saida.publish(vel)
             rospy.sleep(0.1)
 
     except rospy.ROSInterruptException:
