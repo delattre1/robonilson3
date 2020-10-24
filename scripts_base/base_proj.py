@@ -62,6 +62,7 @@ tf_buffer = tf2_ros.Buffer()
 #     print("Posicao (x,y)  ({:.2f} , {:.2f}) + angulo {:.2f}".format(x, y, angs_degree[2]))
 
 
+vel = Twist(Vector3(0,0,0), Vector3(0,0, 0))
 
 # A função a seguir é chamada sempre que chega um novo frame
 def roda_todo_frame(imagem):
@@ -70,7 +71,9 @@ def roda_todo_frame(imagem):
     global media
     global centro
     global resultados
+    global vel
 
+    vel_lin = 0.1 #velocidade linear
     now = rospy.get_rostime()
     imgtime = imagem.header.stamp
     lag = now-imgtime # calcula o lag
@@ -82,8 +85,17 @@ def roda_todo_frame(imagem):
     try:
         antes = time.clock()
         temp_image = bridge.compressed_imgmsg_to_cv2(imagem, "bgr8")
-        window_selecionada = center_mass.seleciona_window_centro_de_massa(temp_image)
+        window_selecionada, centro_de_massa = center_mass.seleciona_window_centro_de_massa(temp_image)
         cv2.imshow("Centro de massa com area selecionada", window_selecionada)
+
+        go_in_which_direction = center_mass.rotacao_conforme_centro_pista(centro_de_massa)
+        if go_in_which_direction == "virar esquerda":
+            vel = Twist(Vector3(vel_lin,0,0), Vector3(0,0, math.pi/15))
+        elif go_in_which_direction == "virar direita":
+            vel = Twist(Vector3(vel_lin,0,0), Vector3(0,0, -math.pi/15))
+        else:
+            vel =  Twist(Vector3(2*vel_lin,0,0), Vector3(0,0, 0))
+
 
 
         # # Note que os resultados já são guardados automaticamente na variável
@@ -119,11 +131,11 @@ if __name__=="__main__":
 
     try:
         # Inicializando - por default gira no sentido anti-horário
-        vel = Twist(Vector3(0,0,0), Vector3(0,0, math.pi/10.0))
+        # vel = Twist(Vector3(0,0,0), Vector3(0,0, math.pi/10.0))
         while not rospy.is_shutdown():
-            for r in resultados:
-                print(r)
-            # velocidade_saida.publish(vel)
+            # for r in resultados:
+            #     print(r)
+            velocidade_saida.publish(vel)
             rospy.sleep(0.1)
 
     except rospy.ROSInterruptException:
