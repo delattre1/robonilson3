@@ -90,11 +90,17 @@ def roda_todo_frame(imagem):
 
         go_in_which_direction = center_mass.rotacao_conforme_centro_pista(centro_de_massa)
         if go_in_which_direction == "virar esquerda":
-            vel = Twist(Vector3(vel_lin,0,0), Vector3(0,0, math.pi/15))
+            vel.angular.z = math.pi/15
+            # vel = Twist(Vector3(vel_lin,0,0), Vector3(0,0, math.pi/15))
         elif go_in_which_direction == "virar direita":
-            vel = Twist(Vector3(vel_lin,0,0), Vector3(0,0, -math.pi/15))
+            # vel = Twist(Vector3(vel_lin,0,0), Vector3(0,0, -math.pi/15))
+            vel.angular.z = -math.pi/15
+
         else:
-            vel =  Twist(Vector3(2*vel_lin,0,0), Vector3(0,0, 0))
+            # vel =  Twist(Vector3(2*vel_lin,0,0), Vector3(0,0, 0))
+            vel.linear.x  = vel_lin*3
+            vel.angular.z = 0
+
 
 
 
