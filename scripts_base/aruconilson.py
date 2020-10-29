@@ -1,3 +1,6 @@
+#! /usr/bin/env python
+# -*- coding:utf-8 -*-
+
 import cv2.aruco as aruco
 import sys
 import numpy as np 
@@ -24,20 +27,25 @@ parameters.adaptiveThreshWinSizeMax = 1000
 id_fim_pista = [100,150,200]
 lowest_dist = 1000
 
-def arucando(bgr_img):#troca nome  #não esta identificando direito, fazer dar meia volta quando a distancia for pequena 
+def arucando(bgr_img):#troca nome  #nao esta identificando direito, fazer dar meia volta quando a distancia for pequena 
     gray = cv2.cvtColor(bgr_img, cv2.COLOR_BGR2GRAY)
     corners, ids, rejectedImgPoints = aruco.detectMarkers(gray, aruco_dict, parameters=parameters)
+    try:
+        is_empty = ids.size == 0
 
-    if ids != None:
-        ret = aruco.estimatePoseSingleMarkers(corners, marker_size, camera_matrix, camera_distortion)
-        rvec, tvec = ret[0][0,0,:], ret[1][0,0,:]
-        distance = np.linalg.norm(tvec)
+        if not is_empty:
+            ret = aruco.estimatePoseSingleMarkers(corners, marker_size, camera_matrix, camera_distortion)
+            rvec, tvec = ret[0][0,0,:], ret[1][0,0,:]
+            distance = np.linalg.norm(tvec)
 
-        if distance < lowest_dist:
-            menor_distancia_tag_fim = distance
+            if distance < lowest_dist:
+                menor_distancia_tag_fim = distance
 
 
-        for i in ids:
-            if i in id_fim_pista and menor_distancia_tag_fim <= 200:
-                print("estado = meia volta")
+            for i in ids:
+                if i in id_fim_pista and menor_distancia_tag_fim <= 200:
+                    print("estado = meia volta")
+    except:
+        pass
+
 

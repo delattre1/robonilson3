@@ -11,13 +11,25 @@ from geometry_msgs.msg import Twist, Vector3
 # cap = cv2.VideoCapture('line_following.mp4')
 
 # Valores para amarelo usando um color picker
-low = np.array([22, 50, 50],dtype=np.uint8)
-high = np.array([36, 255, 255],dtype=np.uint8)
+hsv_amarelo = 30
+hsv_blue = 169
+incerteza = 2
+
+low_blue = np.array([hsv_blue - incerteza, 150, 150],dtype=np.uint8)
+high_blue = np.array([hsv_blue + incerteza, 255, 255],dtype=np.uint8)
+
+
+low_yellow = np.array([hsv_amarelo - incerteza, 150, 150],dtype=np.uint8)
+high_yellow = np.array([hsv_amarelo + incerteza, 255, 255],dtype=np.uint8)
+
 
 def filter_color(bgr, low, high):
     """ REturns a mask within the range"""
     hsv = cv2.cvtColor(bgr, cv2.COLOR_BGR2HSV)
     mask = cv2.inRange(hsv, low, high)
+    kernel = np.ones((5,5),np.uint8)
+    mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
+    cv2.imshow("mask",mask)
     return mask     
 
 # Função centro de massa baseada na aula 02  https://github.com/Insper/robot202/blob/master/aula02/aula02_Exemplos_Adicionais.ipynb
@@ -55,9 +67,9 @@ def seleciona_window_centro_de_massa(img_bgr):
     low_yellow, high_yellow = np.array([22, 50, 50],dtype=np.uint8), np.array([36, 255, 255],dtype=np.uint8)
     yellow_mask = filter_color(img_bgr, low_yellow, high_yellow)
     #selecionar window
-    x0 = 0
+    x0 = 40
     y0 = 40
-    x1 = img_bgr.shape[1]
+    x1 = img_bgr.shape[1] - x0
     # print('é a metade: {}'.format(x1/2))
     y1 = img_bgr.shape[0] - y0
     clipped = yellow_mask[y0:y1, x0:x1]

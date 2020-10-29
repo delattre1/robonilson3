@@ -50,18 +50,17 @@ frame = "camera_link"
 tfl = 0
 tf_buffer = tf2_ros.Buffer()
 vel = Twist(Vector3(0,0,0), Vector3(0,0, 0))
-velocidade_angular = math.pi/15
+velocidade_angular = math.pi/10
 
 # A função a seguir é chamada sempre que chega um novo frame
 def roda_todo_frame(imagem):
-    print("frame")
     global cv_image
     global media
     global centro
     global resultados
     global vel
 
-    vel_lin = 0.1 #velocidade linear
+    vel_lin = 0.2 #velocidade linear
     now = rospy.get_rostime()
     imgtime = imagem.header.stamp
     lag = now-imgtime # calcula o lag
@@ -80,7 +79,7 @@ def roda_todo_frame(imagem):
 
         go_in_which_direction = center_mass.rotacao_conforme_centro_pista(centro_de_massa)
         if go_in_which_direction == "perdeu_pista":
-            vel = Twist(Vector3(0,0,0), Vector3(0,0, velocidade_angular))
+            vel = Twist(Vector3(0,0,0), Vector3(0,0, 3*velocidade_angular))
         elif go_in_which_direction == "virar esquerda":
             vel.angular.z = velocidade_angular
             # vel = Twist(Vector3(vel_lin,0,0), Vector3(0,0, math.pi/15))
@@ -89,25 +88,13 @@ def roda_todo_frame(imagem):
             vel.angular.z = -velocidade_angular
         else:
             # vel =  Twist(Vector3(2*vel_lin,0,0), Vector3(0,0, 0))
-            vel.linear.x  = vel_lin*3
+            vel.linear.x  = vel_lin*2
             vel.angular.z = 0
 
         #utilizando aruco para identificar tag 
         aruconilson.arucando(temp_image)
 
-        # # Note que os resultados já são guardados automaticamente na variável
-        # # chamada resultados
-        # centro, saida_net, resultados =  visao_module.processa(temp_image)        
-        # for r in resultados:
-        #     # print(r) - print feito para documentar e entender
-        #     # o resultado            
-        #     pass
-
-        # depois = time.clock()
-        # # Desnecessário - Hough e MobileNet já abrem janelas
-        # cv_image = saida_net.copy()
-        # cv2.imshow("cv_image", cv_image)
-
+        #colocar aqui img net 
 
         cv2.waitKey(1)
     except CvBridgeError as e:
@@ -118,17 +105,11 @@ if __name__=="__main__":
     topico_imagem = "/camera/image/compressed"
     # odom_sub = rospy.Subscriber("/odom", Odometry, posicao_odometry)
     recebedor = rospy.Subscriber(topico_imagem, CompressedImage, roda_todo_frame, queue_size=4, buff_size = 2**24)
-    # print("Usando ", topico_imagem)
     velocidade_saida = rospy.Publisher("/cmd_vel", Twist, queue_size = 1)
     tfl = tf2_ros.TransformListener(tf_buffer) #conversao do sistema de coordenadas 
     tolerancia = 25
+    try:        
 
-    # Exemplo de categoria de resultados
-    # [('chair', 86.965459585189819, (90, 141), (177, 265))]
-
-    try:
-        # Inicializando - por default gira no sentido anti-horário
-        # vel = Twist(Vector3(0,0,0), Vector3(0,0, math.pi/10.0))
         while not rospy.is_shutdown():
             # for r in resultados:
             #     print(r)
@@ -137,5 +118,3 @@ if __name__=="__main__":
 
     except rospy.ROSInterruptException:
         print("Ocorreu uma exceção com o rospy")
-
-
