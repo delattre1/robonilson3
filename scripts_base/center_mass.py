@@ -67,20 +67,23 @@ def seleciona_window_centro_de_massa(img_bgr):
         cv2.rectangle(img_bgr, (x0, y0), (x1, y1), (255,0,0),2,cv2.LINE_AA) #desenha retangulo da área selecionada
 
     except:
-        print('falha ao selecionar estrada')
+        return img_bgr, None #falha ao selecionar a estrada 
     return img_bgr, posicao_centro_massa
 
 def rotacao_conforme_centro_pista(centro_massa):
-    x_centro = centro_massa[0]
-    incerteza = 20
-    centro = 160
-    lin = 0.04
-    if x_centro < centro - incerteza: #meio é 160
-        # print("tem que girar pra esquerda (+vel_ang)")
-        return "virar esquerda"
-    elif x_centro > centro + incerteza:
-        return "virar direita"
-        # print("tem que virar pra direita (-vel ang) ")
+    if centro_massa != None:
+        x_centro = centro_massa[0]
+        incerteza = 20
+        centro = 160
+        lin = 0.04
+        if x_centro < centro - incerteza: #meio é 160
+            # print("tem que girar pra esquerda (+vel_ang)")
+            return "virar esquerda"
+        elif x_centro > centro + incerteza:
+            return "virar direita"
+            # print("tem que virar pra direita (-vel ang) ")
+        else:
+            return "seguir reto"
     else:
-        return "seguir reto"
+        return "perdeu_pista"
 

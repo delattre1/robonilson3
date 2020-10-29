@@ -22,7 +22,8 @@ from nav_msgs.msg import Odometry
 from std_msgs.msg import Header
 import visao_module
 
-
+#functions related to aruco
+import aruconilson
 #usar mask para chão amarelo
 import center_mass
 
@@ -48,21 +49,8 @@ frame = "camera_link"
 # frame = "head_camera"  # DESCOMENTE para usar com webcam USB via roslaunch tag_tracking usbcam
 tfl = 0
 tf_buffer = tf2_ros.Buffer()
-
-# def posicao_odometry(msg):
-#     # print(msg.pose.pose)
-#     x = msg.pose.pose.position.x
-#     y = msg.pose.pose.position.y
-
-#     quat = msg.pose.pose.orientation
-#     lista = [quat.x, quat.y, quat.z, quat.w]
-#     angulos_rad = transformations.euler_from_quaternion(lista)
-#     alfa = angulos_rad[2]
-#     angs_degree = np.degrees(angulos_rad)
-#     print("Posicao (x,y)  ({:.2f} , {:.2f}) + angulo {:.2f}".format(x, y, angs_degree[2]))
-
-
 vel = Twist(Vector3(0,0,0), Vector3(0,0, 0))
+velocidade_angular = math.pi/15
 
 # A função a seguir é chamada sempre que chega um novo frame
 def roda_todo_frame(imagem):
@@ -85,24 +73,27 @@ def roda_todo_frame(imagem):
     try:
         antes = time.clock()
         temp_image = bridge.compressed_imgmsg_to_cv2(imagem, "bgr8")
+
+        #detectando estrada 
         window_selecionada, centro_de_massa = center_mass.seleciona_window_centro_de_massa(temp_image)
         cv2.imshow("Centro de massa com area selecionada", window_selecionada)
 
         go_in_which_direction = center_mass.rotacao_conforme_centro_pista(centro_de_massa)
-        if go_in_which_direction == "virar esquerda":
-            vel.angular.z = math.pi/15
+        if go_in_which_direction == "perdeu_pista":
+            vel = Twist(Vector3(0,0,0), Vector3(0,0, velocidade_angular))
+        elif go_in_which_direction == "virar esquerda":
+            vel.angular.z = velocidade_angular
             # vel = Twist(Vector3(vel_lin,0,0), Vector3(0,0, math.pi/15))
         elif go_in_which_direction == "virar direita":
             # vel = Twist(Vector3(vel_lin,0,0), Vector3(0,0, -math.pi/15))
-            vel.angular.z = -math.pi/15
-
+            vel.angular.z = -velocidade_angular
         else:
             # vel =  Twist(Vector3(2*vel_lin,0,0), Vector3(0,0, 0))
             vel.linear.x  = vel_lin*3
             vel.angular.z = 0
 
-
-
+        #utilizando aruco para identificar tag 
+        aruconilson.arucando(temp_image)
 
         # # Note que os resultados já são guardados automaticamente na variável
         # # chamada resultados
