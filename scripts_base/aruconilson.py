@@ -7,7 +7,7 @@ import numpy as np
 import cv2
 
 #--- Define Tag de teste
-id_to_find  = 200
+id_to_find  = 21
 marker_size  = 25 #- [cm]
 #id_to_find  = 22
 #marker_size  = 3 #- [cm]
@@ -27,6 +27,8 @@ parameters.adaptiveThreshWinSizeMax = 1000
 id_fim_pista = [100,150,200]
 lowest_dist = 1000
 
+
+
 def arucando(bgr_img):#troca nome  #nao esta identificando direito, fazer dar meia volta quando a distancia for pequena 
     gray = cv2.cvtColor(bgr_img, cv2.COLOR_BGR2GRAY)
     corners, ids, rejectedImgPoints = aruco.detectMarkers(gray, aruco_dict, parameters=parameters)
@@ -41,11 +43,21 @@ def arucando(bgr_img):#troca nome  #nao esta identificando direito, fazer dar me
             if distance < lowest_dist:
                 menor_distancia_tag_fim = distance
 
+			#-- Desenha um retanculo e exibe Id do marker encontrado
+            aruco.drawDetectedMarkers(bgr_img, corners, ids) 
 
             for i in ids:
                 if i in id_fim_pista and menor_distancia_tag_fim <= 200:
                     print("estado = meia volta")
+            
+                if i == id_to_find:
+                    print("To enxergando o ID: ")
+                    print(i)
+                    print("Mudar máquina de estados")
+
     except:
         pass
+
+    return bgr_img
 
 

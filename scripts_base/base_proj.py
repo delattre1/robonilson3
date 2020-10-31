@@ -75,7 +75,7 @@ def roda_todo_frame(imagem):
 
         #detectando estrada 
         window_selecionada, centro_de_massa = center_mass.seleciona_window_centro_de_massa(temp_image)
-        cv2.imshow("Centro de massa com area selecionada", window_selecionada)
+        # cv2.imshow("Centro de massa com area selecionada", window_selecionada)
 
         go_in_which_direction = center_mass.rotacao_conforme_centro_pista(centro_de_massa)
         if go_in_which_direction == "perdeu_pista":
