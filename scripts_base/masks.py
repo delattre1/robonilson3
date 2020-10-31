@@ -5,13 +5,23 @@ hsv_amarelo = 30
 hsv_blue = 120
 hsv_pink = 166
 hsv_vermelho = 0 
-incerteza = 2
+incerteza = 8
 
 hsvs = {"amarelo" : 30, "blue":120, "pink":166 }
+dic_mascaras = {}
 
-
-for k,v in hsvs.items():
+def criar_valores_mascaras(color):
     a = "low_"
-    b = a+k
-    print(b)
+    b = "high_"
     
+    for k,v in hsvs.items():
+        mask_high = b+k
+        mask_low = a+k
+        dic_mascaras[mask_low] = np.array([v-incerteza, 150, 150], dtype=np.uint8)
+        dic_mascaras[mask_high] = np.array([v+incerteza, 255, 255], dtype=np.uint8)
+
+    mask_high = b+color
+    mask_low  = a+color
+
+    return dic_mascaras[mask_low], dic_mascaras[mask_high]
+

@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import cv2, math
+import cv2, math, masks
 import numpy as np 
 from geometry_msgs.msg import Twist, Vector3
 
@@ -10,14 +10,8 @@ from geometry_msgs.msg import Twist, Vector3
 
 # cap = cv2.VideoCapture('line_following.mp4')
 
-# Valores para amarelo usando um color picker
-hsv_amarelo = 30
-hsv_blue = 169
+hsv_amarelo = 30 
 incerteza = 2
-
-low_blue = np.array([hsv_blue - incerteza, 150, 150],dtype=np.uint8)
-high_blue = np.array([hsv_blue + incerteza, 255, 255],dtype=np.uint8)
-
 
 low_yellow = np.array([hsv_amarelo - incerteza, 150, 150],dtype=np.uint8)
 high_yellow = np.array([hsv_amarelo + incerteza, 255, 255],dtype=np.uint8)
@@ -64,10 +58,12 @@ def center_of_mass_region(mask, x1, y1, x2, y2):
 
 def seleciona_window_centro_de_massa(img_bgr):
     global vel 
-    low_yellow, high_yellow = np.array([22, 50, 50],dtype=np.uint8), np.array([36, 255, 255],dtype=np.uint8)
-    yellow_mask = filter_color(img_bgr, low_yellow, high_yellow)
+
+    low_c, high_c = masks.criar_valores_mascaras("amarelo")
+    yellow_mask = filter_color(img_bgr, low_c, high_c)
+
     #selecionar window
-    x0 = 40
+    x0 = 30
     y0 = 40
     x1 = img_bgr.shape[1] - x0
     # print('é a metade: {}'.format(x1/2))
