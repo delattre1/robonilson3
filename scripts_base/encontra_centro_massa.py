@@ -35,6 +35,12 @@ def restringir_window_size(img_bgr, mascara):
     cv2.rectangle(img_bgr, (x0, y0), (x1, y1), (255,0,0),2,cv2.LINE_AA) #desenha retangulo da área selecionada
     return clipped
 
+def buscar_creeper(img_bgr, cor_creeper): #mascara está funcionando, mas nao detecta o centro de massa
+    hsv_low, hsv_high = masks.criar_valores_mascaras(cor_creeper)
+    color_mask = filter_color(img_bgr, hsv_low, hsv_high)
+    posicao_centro_massa = center_of_mass(color_mask) 
+    desenha_centro = crosshair(img_bgr, posicao_centro_massa, 15, (255,100,100))
+
 def centro_massa_cor(img_bgr, str_cor):
     hsv_low, hsv_high = masks.criar_valores_mascaras(str_cor)
     color_mask = filter_color(img_bgr, hsv_low, hsv_high)
@@ -82,4 +88,4 @@ def movimenta_to_centro_massa(qual_direcao, velocidade_atual, vel_lin, vel_ang):
         velocidade_atual.angular.z = -2*vel_ang
         return velocidade_atual
 
-        
+

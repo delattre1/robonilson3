@@ -7,7 +7,7 @@ hsv_pink = 166
 hsv_vermelho = 0 
 incerteza = 8
 
-hsvs = {"amarelo" : 30, "blue":120, "pink":166 }
+hsvs = {"amarelo" : 30, "blue":120, "pink":166, "vermelho":0 }
 dic_mascaras = {}
 
 def criar_valores_mascaras(color):
@@ -25,5 +25,6 @@ def criar_valores_mascaras(color):
 
     return dic_mascaras[mask_low], dic_mascaras[mask_high]
 
-# usage example print(criar_valores_mascaras('blue'))
+# usage example 
+#print(criar_valores_mascaras('vermelho'))
 

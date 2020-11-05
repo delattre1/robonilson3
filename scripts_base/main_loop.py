@@ -12,6 +12,8 @@ from tf import TransformerROS
 
 import encontra_centro_massa, leitura_tags
 
+
+
 def roda_todo_frame(imagem):
     global velocidade
 
@@ -24,11 +26,12 @@ def roda_todo_frame(imagem):
         leitura_tags.identifica_tag(temp_image)
         cor_mascara = 'amarelo'
         which_direction_go = encontra_centro_massa.direcao_centro_massa_cor_escolhida(temp_image, cor_mascara)
-        
+
         print(which_direction_go)
 
         velocidade = encontra_centro_massa.movimenta_to_centro_massa(which_direction_go, velocidade, vel_lin, vel_ang)
 
+        encontra_centro_massa.buscar_creeper(temp_image, cor_do_creeper_buscar)
 
         cv2.imshow("temp img ", temp_image)       
         cv2.waitKey(1)
@@ -44,6 +47,8 @@ velocidade = Twist(Vector3(vel_lin,0,0), Vector3(0,0, 0))
 tfl = 0
 tf_buffer = tf2_ros.Buffer()
 
+
+cor_do_creeper_buscar = "blue"
 
 if __name__=="__main__":
     rospy.init_node("cor")  
