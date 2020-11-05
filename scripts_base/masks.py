@@ -26,3 +26,4 @@ def criar_valores_mascaras(color):
     return dic_mascaras[mask_low], dic_mascaras[mask_high]
 
 # usage example print(criar_valores_mascaras('blue'))
+
