@@ -18,13 +18,13 @@ def identifica_tag(bgr_img, imagem_figuras_desenhadas):
             distance = np.linalg.norm(tvec)
 
             if distance < lowest_dist:
-                menor_distancia_tag_fim = distance   
+                menor_distancia = distance   
 
             print('Distancia da tag: {}').format(distance)
         
-        return menor_distancia_tag_fim, corners, ids
+        return menor_distancia, corners, ids
     except:
-        return None,None,None
+        return 10000000,None,None
         
 
 # def mover_ate_creeper(bgr_img, imagem_figuras_desenhadas, is_creeper_visible):
