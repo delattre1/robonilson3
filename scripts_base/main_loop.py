@@ -13,6 +13,8 @@ from tf import TransformerROS
 import encontra_centro_massa, leitura_tags
 from encontra_centro_massa import direcao_centro_massa_cor_escolhida, restringir_window_creeper_e_tags
 
+from pid import cria_linha_caminho
+
 def encontra_tag_150(temp_image, imagem_figuras_desenhadas):
     # list_xo_y0 = [60,60]
     # temp_image = restringir_window_creeper_e_tags(temp_image, list_xo_y0)
@@ -42,10 +44,13 @@ def roda_todo_frame(imagem):
     try:
         antes = time.clock()
         temp_image = bridge.compressed_imgmsg_to_cv2(imagem, "bgr8")
-        print(estado)
+
 
         imagem_figuras_desenhadas = temp_image.copy()
         is_creeper_visible, posicao_centro_massa_creeper = encontra_centro_massa.buscar_creeper(temp_image, cor_do_creeper_buscar, imagem_figuras_desenhadas)
+
+
+        cria_linha_caminho(temp_image, "amarelo", imagem_figuras_desenhadas)
 
         if estado == "inicializou":
 
