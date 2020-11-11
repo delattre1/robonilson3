@@ -11,16 +11,26 @@ from tf import transformations
 from tf import TransformerROS
 
 import encontra_centro_massa, leitura_tags
-from scan_find_creeper import scaneou
-from encontra_centro_massa import direcao_centro_massa_cor_escolhida
+from encontra_centro_massa import direcao_centro_massa_cor_escolhida, restringir_window_creeper_e_tags
 
 def encontra_tag_150(temp_image, imagem_figuras_desenhadas):
+    # list_xo_y0 = [60,60]
+    # temp_image = restringir_window_creeper_e_tags(temp_image, list_xo_y0)
     menor_distancia, corners, ids = leitura_tags.identifica_tag(temp_image, imagem_figuras_desenhadas)
     if ids is not None:
-        for i in ids:
-            print(i[0])
-            if i[0] == 150 and menor_distancia <= 400:
-                estado = "rotate_until_is_creeper_visible"
+        for numero_tag in ids:
+            print(numero_tag[0])
+            if numero_tag[0] == 150 and menor_distancia <= 450:
+                return True
+    return False
+
+def verifica_id_creeper(ids, menor_distancia):
+    if ids is not None:
+        for numero_tag in ids:
+            if numero_tag[0] not in lista_ids_fim_caminho:
+                if menor_distancia <= 2200 and (menor_distancia is not None):
+                    return "identificou_o_creeper"
+
 
 def roda_todo_frame(imagem):
     global velocidade
@@ -32,23 +42,19 @@ def roda_todo_frame(imagem):
     try:
         antes = time.clock()
         temp_image = bridge.compressed_imgmsg_to_cv2(imagem, "bgr8")
+        print(estado)
 
         imagem_figuras_desenhadas = temp_image.copy()
         is_creeper_visible, posicao_centro_massa_creeper = encontra_centro_massa.buscar_creeper(temp_image, cor_do_creeper_buscar, imagem_figuras_desenhadas)
 
         if estado == "inicializou":
-            which_direction_go = direcao_centro_massa_cor_escolhida(temp_image, cor_mascara_pista, imagem_figuras_desenhadas)
-            encontra_tag_150(temp_image, imagem_figuras_desenhadas)
 
-            if is_creeper_visible:
-                menor_distancia, corners, ids = leitura_tags.identifica_tag(temp_image, imagem_figuras_desenhadas)
-                if ids is not None:
-                    for i in ids:
-                        print(i[0])
-                        if i[0] not in lista_ids_fim_caminho:
-                            if menor_distancia <= 2200 and (menor_distancia is not None):
-                                # estado = "seguir_creeper"
-                                print('nao é none e dist é menor que 2000')
+            if encontra_tag_150(temp_image, imagem_figuras_desenhadas) == True:
+                estado = "rotate_until_is_creeper_visible"
+
+            which_direction_go = direcao_centro_massa_cor_escolhida(temp_image, cor_mascara_pista, imagem_figuras_desenhadas)
+
+
 
         elif estado == "seguir_creeper":
             menor_distancia, corners, ids = leitura_tags.identifica_tag(temp_image, imagem_figuras_desenhadas)
@@ -71,6 +77,10 @@ def roda_todo_frame(imagem):
 
         elif estado == "rotate_until_is_creeper_visible":
             which_direction_go = 'rotate_until_is_creeper_visible'
+            if is_creeper_visible:
+                menor_distancia_ate_creeper, corners, ids = leitura_tags.identifica_tag(temp_image, imagem_figuras_desenhadas)
+                if verifica_id_creeper(ids, menor_distancia_ate_creeper) == "identificou_o_creeper":
+                    estado = "seguir_creeper"
 
         velocidade = encontra_centro_massa.movimenta_to_centro_massa(which_direction_go, velocidade, vel_lin, vel_ang)
 
@@ -88,7 +98,7 @@ velocidade = Twist(Vector3(vel_lin,0,0), Vector3(0,0, 0))
 tfl = 0
 tf_buffer = tf2_ros.Buffer()
 
-cor_do_creeper_buscar = "blue"
+cor_do_creeper_buscar = "pink"  #pink blue vermelho
 cor_mascara_pista     = 'amarelo'        
 
 
@@ -101,7 +111,6 @@ if __name__=="__main__":
     topico_imagem = "/camera/image/compressed"
     recebedor = rospy.Subscriber(topico_imagem, CompressedImage, roda_todo_frame, queue_size=4, buff_size = 2**24)
     velocidade_saida = rospy.Publisher("/cmd_vel", Twist, queue_size = 1)
-    # recebe_scan = rospy.Subscriber("/scan", LaserScan, scaneou)
 
     tfl = tf2_ros.TransformListener(tf_buffer) #conversao do sistema de coordenadas 
 

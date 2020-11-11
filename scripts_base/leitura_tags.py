@@ -26,24 +26,6 @@ def identifica_tag(bgr_img, imagem_figuras_desenhadas):
     except:
         return 10000000,None,None
         
-
-# def mover_ate_creeper(bgr_img, imagem_figuras_desenhadas, is_creeper_visible):
-#     if is_creeper_visible:
-#         try: 
-#             distancia_ate_tag, corners, ids = identifica_tag(bgr_img, imagem_figuras_desenhadas)
-#             #-- Desenha um retanculo e exibe Id do marker encontrado
-
-#             aruco.drawDetectedMarkers(imagem_figuras_desenhadas, corners, ids) 
-#             print(distancia_ate_tag)
-#             for i in ids:
-#                 if distancia_ate_tag <= 1500:
-#                     print("estado = move to direction of creeper")
-#                     # print("{}").format(i)
-
-#         except:
-#             pass    
-
-
 #--- Get the camera calibration path
 calib_path  = "/home/borg/catkin_ws/src/robot202/ros/exemplos202/scripts/"
 camera_matrix   = np.loadtxt(calib_path+'cameraMatrix_raspi.txt', delimiter=',')
