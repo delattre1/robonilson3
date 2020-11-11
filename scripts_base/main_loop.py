@@ -14,7 +14,13 @@ import encontra_centro_massa, leitura_tags
 from scan_find_creeper import scaneou
 from encontra_centro_massa import direcao_centro_massa_cor_escolhida
 
-
+def encontra_tag_150(temp_image, imagem_figuras_desenhadas):
+    menor_distancia, corners, ids = leitura_tags.identifica_tag(temp_image, imagem_figuras_desenhadas)
+    if ids is not None:
+        for i in ids:
+            print(i[0])
+            if i[0] == 150 and menor_distancia <= 400:
+                estado = "rotate_until_is_creeper_visible"
 
 def roda_todo_frame(imagem):
     global velocidade
@@ -30,19 +36,18 @@ def roda_todo_frame(imagem):
         imagem_figuras_desenhadas = temp_image.copy()
         is_creeper_visible, posicao_centro_massa_creeper = encontra_centro_massa.buscar_creeper(temp_image, cor_do_creeper_buscar, imagem_figuras_desenhadas)
 
-
-        cor_mascara = 'amarelo'        
-
         if estado == "inicializou":
-            which_direction_go = direcao_centro_massa_cor_escolhida(temp_image, cor_mascara, imagem_figuras_desenhadas)
+            which_direction_go = direcao_centro_massa_cor_escolhida(temp_image, cor_mascara_pista, imagem_figuras_desenhadas)
+            encontra_tag_150(temp_image, imagem_figuras_desenhadas)
 
             if is_creeper_visible:
                 menor_distancia, corners, ids = leitura_tags.identifica_tag(temp_image, imagem_figuras_desenhadas)
                 if ids is not None:
                     for i in ids:
+                        print(i[0])
                         if i[0] not in lista_ids_fim_caminho:
                             if menor_distancia <= 2200 and (menor_distancia is not None):
-                                estado = "seguir_creeper"
+                                # estado = "seguir_creeper"
                                 print('nao é none e dist é menor que 2000')
 
         elif estado == "seguir_creeper":
@@ -55,15 +60,17 @@ def roda_todo_frame(imagem):
 
 
         elif estado == 'terminar_circuito':
-            which_direction_go = direcao_centro_massa_cor_escolhida(temp_image, cor_mascara, imagem_figuras_desenhadas)
+            which_direction_go = direcao_centro_massa_cor_escolhida(temp_image, cor_mascara_pista, imagem_figuras_desenhadas)
             distancia_tag_fazer_curva, corners, ids = leitura_tags.identifica_tag(temp_image, imagem_figuras_desenhadas)
             if ids is not None:
                 for i in ids:
                     print(i[0])
                     if i[0] == 200:
                         print("identifiquei a tag que é pra virar pra esquerda")
+        
 
-
+        elif estado == "rotate_until_is_creeper_visible":
+            which_direction_go = 'rotate_until_is_creeper_visible'
 
         velocidade = encontra_centro_massa.movimenta_to_centro_massa(which_direction_go, velocidade, vel_lin, vel_ang)
 
@@ -82,6 +89,8 @@ tfl = 0
 tf_buffer = tf2_ros.Buffer()
 
 cor_do_creeper_buscar = "blue"
+cor_mascara_pista     = 'amarelo'        
+
 
 estado = "inicializou"
 
