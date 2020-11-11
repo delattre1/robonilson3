@@ -12,6 +12,7 @@ from tf import TransformerROS
 
 import encontra_centro_massa, leitura_tags
 from scan_find_creeper import scaneou
+from encontra_centro_massa import direcao_centro_massa_cor_escolhida
 
 
 
@@ -34,23 +35,27 @@ def roda_todo_frame(imagem):
         print(estado)
         
 
-        if is_creeper_visible and estado != "terminar_circuito" and estado != "seguir_creeper":
-            menor_distancia, corners, ids = leitura_tags.identifica_tag(temp_image, imagem_figuras_desenhadas)
-            print(menor_distancia)
-            if menor_distancia <= 2200 and (menor_distancia is not None):
-                estado = "seguir_creeper"
-                print('nao é none e dist é menor que 2000')
+        if estado == "inicializou":
+            which_direction_go = direcao_centro_massa_cor_escolhida(temp_image, cor_mascara, imagem_figuras_desenhadas)
 
-        if estado == "seguir_creeper":
+            if is_creeper_visible:
+                menor_distancia, corners, ids = leitura_tags.identifica_tag(temp_image, imagem_figuras_desenhadas)
+                if menor_distancia <= 2200 and (menor_distancia is not None):
+                    estado = "seguir_creeper"
+                    print('nao é none e dist é menor que 2000')
+
+        elif estado == "seguir_creeper":
             menor_distancia, corners, ids = leitura_tags.identifica_tag(temp_image, imagem_figuras_desenhadas)
 
             which_direction_go = encontra_centro_massa.move_to_creeper(posicao_centro_massa_creeper)
+
             if menor_distancia <= 200:
                 estado = "terminar_circuito"
 
 
-        elif estado == "inicializou" or estado == 'terminar_circuito':
-            which_direction_go = encontra_centro_massa.direcao_centro_massa_cor_escolhida(temp_image, cor_mascara, imagem_figuras_desenhadas)
+        elif estado == 'terminar_circuito':
+            which_direction_go = direcao_centro_massa_cor_escolhida(temp_image, cor_mascara, imagem_figuras_desenhadas)
+
 
         velocidade = encontra_centro_massa.movimenta_to_centro_massa(which_direction_go, velocidade, vel_lin, vel_ang)
 
