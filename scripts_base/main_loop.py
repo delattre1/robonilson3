@@ -23,17 +23,23 @@ def roda_todo_frame(imagem):
     try:
         antes = time.clock()
         temp_image = bridge.compressed_imgmsg_to_cv2(imagem, "bgr8")
-        leitura_tags.identifica_tag(temp_image)
-        cor_mascara = 'amarelo'
-        which_direction_go = encontra_centro_massa.direcao_centro_massa_cor_escolhida(temp_image, cor_mascara)
 
-        print(which_direction_go)
+        imagem_figuras_desenhadas = temp_image.copy()
+        is_creeper_visible, posicao_centro_massa_creeper = encontra_centro_massa.buscar_creeper(temp_image, cor_do_creeper_buscar, imagem_figuras_desenhadas)
+
+
+        cor_mascara = 'amarelo'
+        which_direction_go = encontra_centro_massa.direcao_centro_massa_cor_escolhida(temp_image, cor_mascara, imagem_figuras_desenhadas)
+
+
+        if is_creeper_visible:
+            which_direction_go = encontra_centro_massa.move_to_creeper(posicao_centro_massa_creeper)
+
+        leitura_tags.identifica_tag(temp_image, imagem_figuras_desenhadas)
 
         velocidade = encontra_centro_massa.movimenta_to_centro_massa(which_direction_go, velocidade, vel_lin, vel_ang)
 
-        encontra_centro_massa.buscar_creeper(temp_image, cor_do_creeper_buscar)
-
-        cv2.imshow("temp img ", temp_image)       
+        cv2.imshow("temp img ", imagem_figuras_desenhadas)       
         cv2.waitKey(1)
     except CvBridgeError as e:
         print('ex', e)
