@@ -17,8 +17,13 @@ def criar_valores_mascaras(color):
     for k,v in hsvs.items():
         mask_high = b+k
         mask_low = a+k
-        dic_mascaras[mask_low] = np.array([v-incerteza, 150, 150], dtype=np.uint8)
-        dic_mascaras[mask_high] = np.array([v+incerteza, 255, 255], dtype=np.uint8)
+
+        if color == "vermelho":
+            dic_mascaras[mask_low]  = np.array([0, 150, 150], dtype=np.uint8)
+            dic_mascaras[mask_high] = np.array([10, 255, 255], dtype=np.uint8)
+        else:
+            dic_mascaras[mask_low] = np.array([v-incerteza, 150, 150], dtype=np.uint8)
+            dic_mascaras[mask_high] = np.array([v+incerteza, 255, 255], dtype=np.uint8)
 
     mask_high = b+color
     mask_low  = a+color

@@ -86,6 +86,8 @@ def buscar_creeper(img_bgr_limpa, cor_creeper, img_bgr_visivel):
     hsv_low, hsv_high  = masks.criar_valores_mascaras(cor_creeper)
     is_creeper_visible = False
     color_mask_creeper = filter_color(img_bgr_limpa, hsv_low, hsv_high)
+    cv2.imshow("red mask", color_mask_creeper)
+
     try: 
         posicao_centro_massa_creeper = center_of_mass(color_mask_creeper) 
         desenha_centro = crosshair(img_bgr_visivel, posicao_centro_massa_creeper, 8, (255,100,100))
