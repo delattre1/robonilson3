@@ -103,7 +103,7 @@ velocidade = Twist(Vector3(vel_lin,0,0), Vector3(0,0, 0))
 tfl = 0
 tf_buffer = tf2_ros.Buffer()
 
-cor_do_creeper_buscar = "blue"  #pink blue vermelho
+cor_do_creeper_buscar = "vermelho"  #pink blue vermelho
 cor_mascara_pista     = 'amarelo'        
 
 
