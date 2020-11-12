@@ -50,9 +50,9 @@ def roda_todo_frame(imagem):
         # is_creeper_visible, posicao_centro_massa_creeper = encontra_centro_massa.buscar_creeper(temp_image, cor_do_creeper_buscar, imagem_figuras_desenhadas)
 
 
-        erro, tg = cria_linha_caminho(temp_image, "amarelo", imagem_figuras_desenhadas)
+        erro, sin_alfa = cria_linha_caminho(temp_image, "amarelo", imagem_figuras_desenhadas)
         if erro != None:
-            velocidade = altera_velociade(velocidade, erro, tg)
+            velocidade = altera_velociade(velocidade, erro, sin_alfa)
             # print(velocidade)
 
         # if estado == "inicializou":
@@ -98,7 +98,7 @@ def roda_todo_frame(imagem):
 
 bridge = CvBridge()
 
-vel_lin = 0.25
+vel_lin = 0.0
 vel_ang = math.pi/15
 velocidade = Twist(Vector3(vel_lin,0,0), Vector3(0,0, 0))
 

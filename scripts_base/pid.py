@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import cv2, masks
+import cv2, masks, math
 import numpy as np 
 from geometry_msgs.msg import Twist, Vector3
 
@@ -46,27 +46,36 @@ def cria_linha_caminho(img_bgr_limpa, str_cor, img_bgr_visivel):
 
         erro_x = (cm_xy[0] - centro_x_tela)
         tg_alfa = derivada_estrada(cm_xy[0], cm_xy[1])
+        alfa = math.atan(tg_alfa)
+        sin_alfa = math.sin(alfa)
+        print("erro e seno: ")
+        print(erro_x, sin_alfa)
+
     
-        return erro_x, tg_alfa
+        return erro_x, sin_alfa
 
     else:
         return None, None
 
     # cv2.imshow("mask Estrada", color_mask)
 
-ke = 0.00001 #constante erro
-kd = 0.001  #constante derivada
+kp = 0.005 #constante erro
+kd = 10  #constante derivada
 
-def altera_velociade(velocidade_atual, erro_x, tg_alfa):
+def altera_velociade(velocidade_atual, erro_x, sin_alfa):
     vel_ang_z = velocidade_atual.angular.z
     alterar_ang = (vel_ang_z <= 0 and vel_ang_z >= -1.5) or (vel_ang_z >= 0 and vel_ang_z <= 1.5)
-    print(alterar_ang)
     if alterar_ang:
         print("")
-        print((-ke*erro_x))
-        print(kd)
-        velocidade_atual.angular.z += (-ke*erro_x - kd*tg_alfa)
-        print("atual: {} ").format(velocidade_atual.angular.z)
+        change_in_velocity = -kp*(erro_x + kd*sin_alfa)
+        velocidade_atual.angular.z = change_in_velocity #- (velocidade_atual.angular.z*0.1)
+
+        print()
+        vel_lin = .8 - abs(change_in_velocity)
+        velocidade_atual.linear.x  =  vel_lin
+        print("linera: {} ").format(vel_lin)
+
+        print("ang: {} ").format(change_in_velocity)
 
     return velocidade_atual
 
