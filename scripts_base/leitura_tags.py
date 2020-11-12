@@ -25,6 +25,22 @@ def identifica_tag(bgr_img, imagem_figuras_desenhadas):
         return menor_distancia, corners, ids
     except:
         return 10000000,None,None
+
+
+def encontra_tag_150(temp_image, imagem_figuras_desenhadas):
+    menor_distancia, corners, ids = identifica_tag(temp_image, imagem_figuras_desenhadas)
+    if ids is not None:
+        for numero_tag in ids:
+            if numero_tag[0] == 150 and menor_distancia <= 450:
+                return True
+    return False
+
+def verifica_id_creeper(ids, menor_distancia):
+    if ids is not None:
+        for numero_tag in ids:
+            if numero_tag[0] not in lista_ids_fim_caminho:
+                if menor_distancia <= 2200 and (menor_distancia is not None):
+                    return "identificou_o_creeper"
         
 #--- Get the camera calibration path
 calib_path  = "/home/borg/catkin_ws/src/robot202/ros/exemplos202/scripts/"
@@ -38,6 +54,6 @@ parameters.minDistanceToBorder = 0
 parameters.adaptiveThreshWinSizeMax = 1000
 
 lowest_dist = 1500
-id_fim_pista = [100,150,200]
 marker_size  = 25 #- [cm]
 id_to_find = 21
+lista_ids_fim_caminho = [50,100,150,200]

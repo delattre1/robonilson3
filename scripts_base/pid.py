@@ -27,35 +27,34 @@ def window_yellow_line(img_bgr_limpa, img_bgr_visivel):
 def derivada_estrada(x, y):
     return (float(x-centro_x_tela)/(tamanho_tela_y-y))
 
-def cria_linha_caminho(img_bgr_limpa, str_cor, img_bgr_visivel):
+def encontra_direcao_ate_cm(img_bgr_limpa, str_cor, img_bgr_visivel):
     hsv_low, hsv_high = masks.criar_valores_mascaras(str_cor)
 
-    estrita_window = window_yellow_line(img_bgr_limpa, img_bgr_visivel)
-
-    color_mask = filter_color(estrita_window, hsv_low, hsv_high)
+    if str_cor == "amarelo":
+        estrita_window = window_yellow_line(img_bgr_limpa, img_bgr_visivel)
+        color_mask = filter_color(estrita_window, hsv_low, hsv_high)
+    
+    else:
+        color_mask = filter_color(img_bgr_limpa, hsv_low, hsv_high)
 
     try:
         cm_xy = center_of_mass(color_mask)
     except:
-        cm_xy = (0,0)
+        return None, None
 
-    if cm_xy != (0,0):
+    if str_cor == "amarelo":
         cm_xy[0] += (x0)
         cm_xy[1] += (y0)
-        crosshair(img_bgr_visivel, cm_xy, 4, (120,44,255))
+    crosshair(img_bgr_visivel, cm_xy, 4, (120,44,255))
 
-        erro_x = (cm_xy[0] - centro_x_tela)
-        tg_alfa = derivada_estrada(cm_xy[0], cm_xy[1])
-        alfa = math.atan(tg_alfa)
-        sin_alfa = math.sin(alfa)
-        print("erro e seno: ")
-        print(erro_x, sin_alfa)
+    erro_x = (cm_xy[0] - centro_x_tela)
+    tg_alfa = derivada_estrada(cm_xy[0], cm_xy[1])
+    alfa = math.atan(tg_alfa)
+    sin_alfa = math.sin(alfa)
+    print("erro e seno: ")
+    print(erro_x, sin_alfa)
 
-    
-        return erro_x, sin_alfa
-
-    else:
-        return None, None
+    return erro_x, sin_alfa      
 
     # cv2.imshow("mask Estrada", color_mask)
 
@@ -79,3 +78,16 @@ def altera_velociade(velocidade_atual, erro_x, sin_alfa):
 
     return velocidade_atual
 
+def altera_velociade_bater_creeper(velocidade_atual, erro_x, sin_alfa):
+    print("")
+    change_in_velocity = -kp*(erro_x + kd*sin_alfa)
+    velocidade_atual.angular.z = change_in_velocity #- (velocidade_atual.angular.z*0.1)
+
+    print()
+    vel_lin = .5 - abs(change_in_velocity)
+    velocidade_atual.linear.x  =  vel_lin
+
+    print("linera: {} ").format(vel_lin)
+    print("ang: {} ").format(change_in_velocity)
+
+    return velocidade_atual
