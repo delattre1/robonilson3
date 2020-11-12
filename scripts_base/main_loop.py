@@ -13,7 +13,7 @@ from tf import TransformerROS
 import encontra_centro_massa, leitura_tags
 from encontra_centro_massa import direcao_centro_massa_cor_escolhida, restringir_window_creeper_e_tags
 
-from pid import cria_linha_caminho
+from pid import cria_linha_caminho, altera_velociade
 
 def encontra_tag_150(temp_image, imagem_figuras_desenhadas):
     # list_xo_y0 = [60,60]
@@ -21,7 +21,7 @@ def encontra_tag_150(temp_image, imagem_figuras_desenhadas):
     menor_distancia, corners, ids = leitura_tags.identifica_tag(temp_image, imagem_figuras_desenhadas)
     if ids is not None:
         for numero_tag in ids:
-            print(numero_tag[0])
+
             if numero_tag[0] == 150 and menor_distancia <= 450:
                 return True
     return False
@@ -47,47 +47,49 @@ def roda_todo_frame(imagem):
 
 
         imagem_figuras_desenhadas = temp_image.copy()
-        is_creeper_visible, posicao_centro_massa_creeper = encontra_centro_massa.buscar_creeper(temp_image, cor_do_creeper_buscar, imagem_figuras_desenhadas)
+        # is_creeper_visible, posicao_centro_massa_creeper = encontra_centro_massa.buscar_creeper(temp_image, cor_do_creeper_buscar, imagem_figuras_desenhadas)
 
 
-        cria_linha_caminho(temp_image, "amarelo", imagem_figuras_desenhadas)
+        erro, tg = cria_linha_caminho(temp_image, "amarelo", imagem_figuras_desenhadas)
+        if erro != None:
+            velocidade = altera_velociade(velocidade, erro, tg)
+            # print(velocidade)
 
-        if estado == "inicializou":
+        # if estado == "inicializou":
 
-            if encontra_tag_150(temp_image, imagem_figuras_desenhadas) == True:
-                estado = "rotate_until_is_creeper_visible"
+        #     if encontra_tag_150(temp_image, imagem_figuras_desenhadas) == True:
+        #         estado = "rotate_until_is_creeper_visible"
 
-            which_direction_go = direcao_centro_massa_cor_escolhida(temp_image, cor_mascara_pista, imagem_figuras_desenhadas)
-
-
-
-        elif estado == "seguir_creeper":
-            menor_distancia, corners, ids = leitura_tags.identifica_tag(temp_image, imagem_figuras_desenhadas)
-
-            which_direction_go = encontra_centro_massa.move_to_creeper(posicao_centro_massa_creeper)
-
-            if menor_distancia <= 240:
-                estado = "terminar_circuito"
+        #     which_direction_go = direcao_centro_massa_cor_escolhida(temp_image, cor_mascara_pista, imagem_figuras_desenhadas)
 
 
-        elif estado == 'terminar_circuito':
-            which_direction_go = direcao_centro_massa_cor_escolhida(temp_image, cor_mascara_pista, imagem_figuras_desenhadas)
-            distancia_tag_fazer_curva, corners, ids = leitura_tags.identifica_tag(temp_image, imagem_figuras_desenhadas)
-            if ids is not None:
-                for i in ids:
-                    print(i[0])
-                    if i[0] == 200:
-                        print("identifiquei a tag que é pra virar pra esquerda")
+
+        # elif estado == "seguir_creeper":
+        #     menor_distancia, corners, ids = leitura_tags.identifica_tag(temp_image, imagem_figuras_desenhadas)
+
+        #     which_direction_go = encontra_centro_massa.move_to_creeper(posicao_centro_massa_creeper)
+
+        #     if menor_distancia <= 240:
+        #         estado = "terminar_circuito"
+
+
+        # elif estado == 'terminar_circuito':
+        #     which_direction_go = direcao_centro_massa_cor_escolhida(temp_image, cor_mascara_pista, imagem_figuras_desenhadas)
+        #     distancia_tag_fazer_curva, corners, ids = leitura_tags.identifica_tag(temp_image, imagem_figuras_desenhadas)
+        #     if ids is not None:
+        #         for i in ids:
+        #             if i[0] == 200:
+        #                 print("identifiquei a tag que é pra virar pra esquerda")
         
 
-        elif estado == "rotate_until_is_creeper_visible":
-            which_direction_go = 'rotate_until_is_creeper_visible'
-            if is_creeper_visible:
-                menor_distancia_ate_creeper, corners, ids = leitura_tags.identifica_tag(temp_image, imagem_figuras_desenhadas)
-                if verifica_id_creeper(ids, menor_distancia_ate_creeper) == "identificou_o_creeper":
-                    estado = "seguir_creeper"
+        # elif estado == "rotate_until_is_creeper_visible":
+        #     which_direction_go = 'rotate_until_is_creeper_visible'
+        #     if is_creeper_visible:
+        #         menor_distancia_ate_creeper, corners, ids = leitura_tags.identifica_tag(temp_image, imagem_figuras_desenhadas)
+        #         if verifica_id_creeper(ids, menor_distancia_ate_creeper) == "identificou_o_creeper":
+        #             estado = "seguir_creeper"
 
-        velocidade = encontra_centro_massa.movimenta_to_centro_massa(which_direction_go, velocidade, vel_lin, vel_ang)
+        # velocidade = encontra_centro_massa.movimenta_to_centro_massa(which_direction_go, velocidade, vel_lin, vel_ang)
 
         cv2.imshow("temp img ", imagem_figuras_desenhadas)       
         cv2.waitKey(1)
