@@ -42,12 +42,13 @@ def roda_todo_frame(imagem):
     try:
         antes = time.clock()
         temp_image = bridge.compressed_imgmsg_to_cv2(imagem, "bgr8")
-        print(estado)
 
         imagem_figuras_desenhadas = temp_image.copy()
         is_creeper_visible, posicao_centro_massa_creeper = encontra_centro_massa.buscar_creeper(temp_image, cor_do_creeper_buscar, imagem_figuras_desenhadas)
 
         if estado == "inicializou":
+            print(estado)
+
 
             if encontra_tag_150(temp_image, imagem_figuras_desenhadas) == True:
                 estado = "rotate_until_is_creeper_visible"
@@ -57,6 +58,8 @@ def roda_todo_frame(imagem):
 
 
         elif estado == "seguir_creeper":
+            print(estado)
+
             menor_distancia, corners, ids = leitura_tags.identifica_tag(temp_image, imagem_figuras_desenhadas)
 
             which_direction_go = encontra_centro_massa.move_to_creeper(posicao_centro_massa_creeper)
@@ -68,6 +71,7 @@ def roda_todo_frame(imagem):
         elif estado == 'terminar_circuito':
             which_direction_go = direcao_centro_massa_cor_escolhida(temp_image, cor_mascara_pista, imagem_figuras_desenhadas)
             distancia_tag_fazer_curva, corners, ids = leitura_tags.identifica_tag(temp_image, imagem_figuras_desenhadas)
+            print(estado)
             if ids is not None:
                 for i in ids:
                     print(i[0])
@@ -76,6 +80,7 @@ def roda_todo_frame(imagem):
         
 
         elif estado == "rotate_until_is_creeper_visible":
+            print(estado)
             which_direction_go = 'rotate_until_is_creeper_visible'
             if is_creeper_visible:
                 menor_distancia_ate_creeper, corners, ids = leitura_tags.identifica_tag(temp_image, imagem_figuras_desenhadas)
@@ -98,7 +103,7 @@ velocidade = Twist(Vector3(vel_lin,0,0), Vector3(0,0, 0))
 tfl = 0
 tf_buffer = tf2_ros.Buffer()
 
-cor_do_creeper_buscar = "pink"  #pink blue vermelho
+cor_do_creeper_buscar = "blue"  #pink blue vermelho
 cor_mascara_pista     = 'amarelo'        
 
 

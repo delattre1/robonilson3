@@ -85,12 +85,12 @@ def movimenta_to_centro_massa(qual_direcao, velocidade_atual, vel_lin, vel_ang):
 
     elif qual_direcao == "perdeu pista":
         velocidade_atual.linear.x = 0
-        velocidade_atual.angular.z = -3*vel_ang
+        velocidade_atual.angular.z = -5*vel_ang
         return velocidade_atual
 
     elif qual_direcao == 'rotate_until_is_creeper_visible':
         velocidade_atual.linear.x = 0
-        velocidade_atual.angular.z = -3*vel_ang
+        velocidade_atual.angular.z = -4*vel_ang
         
         return velocidade_atual
 
