@@ -8,13 +8,15 @@ from geometry_msgs.msg import Twist, Vector3
 from encontra_centro_massa import * 
 
 str_cor = "amarelo"
-
 low_threshold=50
 high_threshold=150
 
 x0, y0 = 40, 100
 centro_x_tela = 160
 tamanho_tela_y = 240
+
+kp = 0.005 #constante erro
+kd = 10    #constante derivada
 
 def window_yellow_line(img_bgr_limpa, img_bgr_visivel):
     x1 = img_bgr_limpa.shape[1] - x0
@@ -51,43 +53,26 @@ def encontra_direcao_ate_cm(img_bgr_limpa, str_cor, img_bgr_visivel):
     tg_alfa = derivada_estrada(cm_xy[0], cm_xy[1])
     alfa = math.atan(tg_alfa)
     sin_alfa = math.sin(alfa)
-    print("erro e seno: ")
-    print(erro_x, sin_alfa)
-
     return erro_x, sin_alfa      
 
     # cv2.imshow("mask Estrada", color_mask)
-
-kp = 0.005 #constante erro
-kd = 10  #constante derivada
 
 def altera_velociade(velocidade_atual, erro_x, sin_alfa):
     vel_ang_z = velocidade_atual.angular.z
     alterar_ang = (vel_ang_z <= 0 and vel_ang_z >= -1.5) or (vel_ang_z >= 0 and vel_ang_z <= 1.5)
     if alterar_ang:
-        print("")
         change_in_velocity = -kp*(erro_x + kd*sin_alfa)
         velocidade_atual.angular.z = change_in_velocity #- (velocidade_atual.angular.z*0.1)
 
-        print()
         vel_lin = .8 - abs(change_in_velocity)
         velocidade_atual.linear.x  =  vel_lin
-        print("linera: {} ").format(vel_lin)
-
-        print("ang: {} ").format(change_in_velocity)
 
     return velocidade_atual
 
 def altera_velociade_bater_creeper(velocidade_atual, erro_x, sin_alfa):
-    print("")
     change_in_velocity = -kp*(erro_x + kd*sin_alfa)
     velocidade_atual.angular.z = change_in_velocity #- (velocidade_atual.angular.z*0.1)
 
-    print()
     vel_lin = .5 - abs(change_in_velocity)
     velocidade_atual.linear.x  =  vel_lin
-
-    print("linera: {} ").format(vel_lin)
-    print("ang: {} ").format(change_in_velocity)
-
     return velocidade_atual

@@ -18,48 +18,6 @@ from pid import encontra_direcao_ate_cm, altera_velociade, altera_velociade_bate
 from estados import *
 
 
-def go_to_creeper(temp_image, imagem_figuras_desenhadas):
-    global velocidade
-    global estado
-    global contador_bateu_creeper
-
-    menor_distancia, corners, ids = leitura_tags.identifica_tag(temp_image, imagem_figuras_desenhadas)
-
-    erro, sin_alfa = encontra_direcao_ate_cm(temp_image, cor_do_creeper_buscar, imagem_figuras_desenhadas)
-    if erro != None:
-        velocidade = altera_velociade_bater_creeper(velocidade, erro, sin_alfa)
-
-    if menor_distancia <= 240:
-        contador_bateu_creeper += 1
-        if contador_bateu_creeper >= 5:
-            estado = "voltar_pra_pista"
-
-
-
-def voltar_pra_pista(temp_image, imagem_figuras_desenhadas):
-    global velocidade
-    global estado
-
-    distancia_cm_ao_centro, sin_alfa = encontra_direcao_ate_cm(temp_image, "amarelo", imagem_figuras_desenhadas)
-    if distancia_cm_ao_centro == None:
-        velocidade.linear.x  = -0.3
-        velocidade.angular.z = 2*vel_ang
-    else:
-        estado = "terminar_circuito"
-
-
-
-def finish_circuito(temp_image, imagem_figuras_desenhadas):
-    global velocidade
-    global estado
-
-    erro, sin_alfa = encontra_direcao_ate_cm(temp_image, "amarelo", imagem_figuras_desenhadas)
-    if erro != None:
-        velocidade = altera_velociade(velocidade, erro, sin_alfa)
-    else:
-        velocidade.linear.x = 0
-        velocidade.angular.z = -4*vel_ang
-
         
 def roda_todo_frame(imagem):
     global velocidade
@@ -70,13 +28,12 @@ def roda_todo_frame(imagem):
 
     #não está enxergando a pista
     try:
-        print("estado no codigo: {}").format(estado)
 
         antes = time.clock()
         temp_image = bridge.compressed_imgmsg_to_cv2(imagem, "bgr8")
         imagem_figuras_desenhadas = temp_image.copy()
 
-        is_creeper_visible, posicao_centro_massa_creeper = buscar_creeper(temp_image, cor_do_creeper_buscar, imagem_figuras_desenhadas)
+        is_creeper_visible, posicao_centro_massa_creeper = buscar_creeper(temp_image, cor_do_creeper, imagem_figuras_desenhadas)
 
         if   estado == "inicializou":
             estado, velocidade = inicializou(temp_image, imagem_figuras_desenhadas, estado, velocidade)
@@ -85,14 +42,13 @@ def roda_todo_frame(imagem):
             estado, velocidade = rotate_to_find_creeper(temp_image, imagem_figuras_desenhadas, is_creeper_visible, estado, velocidade)
         
         elif estado == "seguir_creeper":
-            go_to_creeper(temp_image, imagem_figuras_desenhadas)
+            estado, velocidade = go_to_creeper(temp_image, imagem_figuras_desenhadas, is_creeper_visible, estado, velocidade, cor_do_creeper)
 
         elif estado == "voltar_pra_pista":
-            voltar_pra_pista(temp_image, imagem_figuras_desenhadas)
+            estado, velocidade = voltar_pra_pista(temp_image, imagem_figuras_desenhadas, estado, velocidade)
             
-
         elif estado == 'terminar_circuito':
-            finish_circuito(temp_image, imagem_figuras_desenhadas)
+            estado, velocidade = finish_circuito(temp_image, imagem_figuras_desenhadas, estado, velocidade)
 
 
         cv2.imshow("temp img ", imagem_figuras_desenhadas)       
@@ -109,8 +65,8 @@ velocidade = Twist(Vector3(vel_lin,0,0), Vector3(0,0, 0))
 tfl = 0
 tf_buffer = tf2_ros.Buffer()
 
-cor_do_creeper_buscar = "pink"  #pink blue vermelho
-cor_mascara_pista     = 'amarelo'        
+cor_do_creeper = "vermelho"  #pink blue vermelho
+cor_mascara_pista     = 'azul'        
 
 estado = "inicializou"
 contador_bateu_creeper = 0
