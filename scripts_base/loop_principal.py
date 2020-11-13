@@ -11,14 +11,12 @@ from tf import transformations
 from tf import TransformerROS
 
 import encontra_centro_massa, leitura_tags
-from encontra_centro_massa import direcao_centro_massa_cor_escolhida, restringir_window_creeper_e_tags, buscar_creeper
+from encontra_centro_massa import restringir_window_creeper_e_tags, buscar_creeper
 from leitura_tags import encontra_tag_150, verifica_id_creeper
 from pid import encontra_direcao_ate_cm, altera_velociade, altera_velociade_bater_creeper
 
 from estados import *
 
-
-        
 def roda_todo_frame(imagem):
     global velocidade
     global estado
@@ -28,7 +26,6 @@ def roda_todo_frame(imagem):
 
     #não está enxergando a pista
     try:
-
         antes = time.clock()
         temp_image = bridge.compressed_imgmsg_to_cv2(imagem, "bgr8")
         imagem_figuras_desenhadas = temp_image.copy()
@@ -67,13 +64,9 @@ velocidade = Twist(Vector3(vel_lin,0,0), Vector3(0,0, 0))
 tfl = 0
 tf_buffer = tf2_ros.Buffer()
 
-cor_do_creeper     = "vermelho"  #pink blue vermelho
-cor_mascara_pista  = 'azul'        
-
-estado = "inicializou"
-contador_bateu_creeper = 0
-
-
+cor_do_creeper     = "blue"    #pink blue vermelho
+cor_mascara_pista  = 'amarelo'        
+estado             = "inicializou" 
 
 if __name__=="__main__":
     rospy.init_node("cor")  

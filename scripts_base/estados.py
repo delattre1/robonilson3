@@ -15,9 +15,10 @@ def inicializou(temp_image, imagem_figuras_desenhadas, estado, velocidade):
     erro, sin_alfa = encontra_direcao_ate_cm(temp_image, "amarelo", imagem_figuras_desenhadas)
     if erro != None:
         velocidade = altera_velociade(velocidade, erro, sin_alfa)
+        v_ang = velocidade.angular.z
     else:
         velocidade.linear.x = 0
-        velocidade.angular.z = - (vel_ang)
+        velocidade.angular.z = (v_ang)
         pass
     
     if encontra_tag_150(temp_image, imagem_figuras_desenhadas):

@@ -58,8 +58,9 @@ def encontra_direcao_ate_cm(img_bgr_limpa, str_cor, img_bgr_visivel):
     # cv2.imshow("mask Estrada", color_mask)
 
 def altera_velociade(velocidade_atual, erro_x, sin_alfa):
-    change_in_velocity = -kp*(erro_x + kd*sin_alfa)
+    change_in_velocity = -kp*(erro_x + kd*sin_alfa) + 0.02
     velocidade_atual.angular.z = change_in_velocity #- (velocidade_atual.angular.z*0.1)
+
 
     vel_lin = .8 - abs(change_in_velocity)
     velocidade_atual.linear.x  =  vel_lin

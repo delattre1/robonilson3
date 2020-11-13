@@ -51,21 +51,6 @@ def centro_massa_cor(img_bgr_limpa, str_cor, img_bgr_visivel):
     desenha_centro = crosshair(img_bgr_visivel, posicao_centro_massa, 8, (255,0,255))
     return posicao_centro_massa
 
-def direcao_centro_massa_cor_escolhida(img_bgr_limpa, str_cor, img_bgr_visivel):
-    try:
-        cm = centro_massa_cor(img_bgr_limpa, str_cor, img_bgr_visivel)
-        x_centro  = cm[0]
-
-        if x_centro < centro - incerteza:
-            return "virar esquerda"
-        elif x_centro > centro + incerteza:
-            return "virar direita"
-        else:
-            return "seguir reto"
-
-    except:
-        return "perdeu pista"
-
 def restringir_window_creeper_e_tags(img_bgr_limpa, list_xo_y0):
     x0 = list_xo_y0[0]
     y0 = list_xo_y0[1]
@@ -89,20 +74,6 @@ def buscar_creeper(img_bgr_limpa, cor_creeper, img_bgr_visivel):
         return is_creeper_visible, posicao_centro_massa_creeper
     except:
         return is_creeper_visible, (0,0)
-
-def move_to_creeper(posicao_centro_massa_creeper):
-    try:
-        x_centro  = posicao_centro_massa_creeper[0]
-
-        if x_centro < centro - incerteza:
-            return "virar esquerda"
-        elif x_centro > centro + incerteza:
-            return "virar direita"
-        else:
-            return "seguir reto"
-
-    except:
-        return "perdeu pista"
 
 
 incerteza = 15
