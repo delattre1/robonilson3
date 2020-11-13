@@ -10,13 +10,14 @@ vel_ang = math.pi/15
 
 
 def inicializou(temp_image, imagem_figuras_desenhadas, estado, velocidade):
+    v_ang = velocidade.angular.z
 
     erro, sin_alfa = encontra_direcao_ate_cm(temp_image, "amarelo", imagem_figuras_desenhadas)
     if erro != None:
         velocidade = altera_velociade(velocidade, erro, sin_alfa)
     else:
-        # velocidade.linear.x = 0
-        # velocidade.angular.z = -4*vel_ang
+        velocidade.linear.x = 0
+        velocidade.angular.z = - (vel_ang)
         pass
     
     if encontra_tag_150(temp_image, imagem_figuras_desenhadas):
@@ -89,6 +90,6 @@ def leitura_tag(temp_image, imagem_figuras_desenhadas, estado):
 def fazer_curva(estado, velocidade):
     print("BORA FAZER A CURVA")
     velocidade.linear.x = 0
-    
+
     return velocidade
     # velocidade.angular.z = 2*vel_ang

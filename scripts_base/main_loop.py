@@ -67,10 +67,10 @@ velocidade = Twist(Vector3(vel_lin,0,0), Vector3(0,0, 0))
 tfl = 0
 tf_buffer = tf2_ros.Buffer()
 
-cor_do_creeper = "vermelho"  #pink blue vermelho
-cor_mascara_pista     = 'azul'        
+cor_do_creeper     = "vermelho"  #pink blue vermelho
+cor_mascara_pista  = 'azul'        
 
-estado = "terminar_circuito"
+estado = "inicializou"
 contador_bateu_creeper = 0
 
 
@@ -86,7 +86,7 @@ if __name__=="__main__":
     try:
         while not rospy.is_shutdown():
             velocidade_saida.publish(velocidade)
-            rospy.sleep(0.05)
+            rospy.sleep(0.02)
 
     except rospy.ROSInterruptException:
         print("Ocorreu uma exceção com o rospy")
