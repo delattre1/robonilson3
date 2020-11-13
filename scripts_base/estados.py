@@ -66,11 +66,29 @@ def voltar_pra_pista(temp_image, imagem_figuras_desenhadas, estado, velocidade):
 
 def finish_circuito(temp_image, imagem_figuras_desenhadas, estado, velocidade):
     erro, sin_alfa = encontra_direcao_ate_cm(temp_image, "amarelo", imagem_figuras_desenhadas)
+    leitura_tag(temp_image, imagem_figuras_desenhadas, estado)
+
     if erro != None:
         velocidade = altera_velociade(velocidade, erro, sin_alfa)
     else:
         # velocidade.linear.x = 0
         velocidade.angular.z = 2*vel_ang
         pass
-    
+
     return estado, velocidade
+
+def leitura_tag(temp_image, imagem_figuras_desenhadas, estado):
+    menor_distancia_id, corners, ids = identifica_tag(temp_image, imagem_figuras_desenhadas)
+    if ids != None and menor_distancia_id <= 300:
+        for i in ids:
+            if str(i[0]) == "200":
+                estado = "fazendo_a_curva"
+    
+    return estado
+
+def fazer_curva(estado, velocidade):
+    print("BORA FAZER A CURVA")
+    velocidade.linear.x = 0
+    
+    return velocidade
+    # velocidade.angular.z = 2*vel_ang

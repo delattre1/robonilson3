@@ -50,6 +50,8 @@ def roda_todo_frame(imagem):
         elif estado == 'terminar_circuito':
             estado, velocidade = finish_circuito(temp_image, imagem_figuras_desenhadas, estado, velocidade)
 
+        elif estado == 'fazendo_a_curva':
+            fazer_curva(estado, velocidade)
 
         cv2.imshow("temp img ", imagem_figuras_desenhadas)       
         cv2.waitKey(1)
@@ -68,7 +70,7 @@ tf_buffer = tf2_ros.Buffer()
 cor_do_creeper = "vermelho"  #pink blue vermelho
 cor_mascara_pista     = 'azul'        
 
-estado = "inicializou"
+estado = "terminar_circuito"
 contador_bateu_creeper = 0
 
 
