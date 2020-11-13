@@ -57,20 +57,12 @@ def encontra_direcao_ate_cm(img_bgr_limpa, str_cor, img_bgr_visivel):
 
     # cv2.imshow("mask Estrada", color_mask)
 
-def altera_velociade(velocidade_atual, erro_x, sin_alfa):
-    change_in_velocity = -kp*(erro_x + kd*sin_alfa) + 0.02
+def altera_velociade(velocidade_atual, erro_x, sin_alfa, estado):
+    change_in_velocity = -kp*(erro_x + kd*sin_alfa) #+ 0.02
     velocidade_atual.angular.z = change_in_velocity #- (velocidade_atual.angular.z*0.1)
-
-
-    vel_lin = .8 - abs(change_in_velocity)
-    velocidade_atual.linear.x  =  vel_lin
-
-    return velocidade_atual
-
-def altera_velociade_bater_creeper(velocidade_atual, erro_x, sin_alfa):
-    change_in_velocity = -kp*(erro_x + kd*sin_alfa)
-    velocidade_atual.angular.z = change_in_velocity #- (velocidade_atual.angular.z*0.1)
-
-    vel_lin = .5 - abs(change_in_velocity)
+    if estado == "seguir_creeper":
+        vel_lin = .5 - abs(change_in_velocity)
+    else:
+        vel_lin = .8 - abs(change_in_velocity)
     velocidade_atual.linear.x  =  vel_lin
     return velocidade_atual

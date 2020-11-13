@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from pid import encontra_direcao_ate_cm, altera_velociade, altera_velociade_bater_creeper
+from pid import encontra_direcao_ate_cm, altera_velociade
 from leitura_tags import encontra_tag_150
 import math
 from leitura_tags import * 
@@ -14,7 +14,7 @@ def inicializou(temp_image, imagem_figuras_desenhadas, estado, velocidade):
 
     erro, sin_alfa = encontra_direcao_ate_cm(temp_image, "amarelo", imagem_figuras_desenhadas)
     if erro != None:
-        velocidade = altera_velociade(velocidade, erro, sin_alfa)
+        velocidade = altera_velociade(velocidade, erro, sin_alfa, estado)
         v_ang = velocidade.angular.z
     else:
         velocidade.linear.x = 0
@@ -47,7 +47,7 @@ def go_to_creeper(temp_image, imagem_figuras_desenhadas, is_creeper_visible, est
 
     erro, sin_alfa = encontra_direcao_ate_cm(temp_image, cor_do_creeper, imagem_figuras_desenhadas)
     if erro != None:
-        velocidade = altera_velociade_bater_creeper(velocidade, erro, sin_alfa)
+        velocidade = altera_velociade(velocidade, erro, sin_alfa, estado)
 
     if menor_distancia <= 230:
         estado = "voltar_pra_pista"
@@ -55,15 +55,18 @@ def go_to_creeper(temp_image, imagem_figuras_desenhadas, is_creeper_visible, est
     
     return estado, velocidade
 
+contador_volta_pista = 0
+
 def voltar_pra_pista(temp_image, imagem_figuras_desenhadas, estado, velocidade):
+    global contador_volta_pista
     distancia_cm_ao_centro, sin_alfa = encontra_direcao_ate_cm(temp_image, "amarelo", imagem_figuras_desenhadas)
     if distancia_cm_ao_centro == None:
-        velocidade.linear.x  = -0.3
-        velocidade.angular.z = 2*vel_ang
-    else:
+        velocidade.linear.x  = -0.2
+        velocidade.angular.z = -3*vel_ang
+        contador_volta_pista += 1
+    elif contador_volta_pista >= 10:
         estado = "terminar_circuito" #se enxergar a pista, volta a seguir
         print("TERMINAR CIRCUITO")
-
     return estado, velocidade
 
 def finish_circuito(temp_image, imagem_figuras_desenhadas, estado, velocidade):
@@ -71,10 +74,10 @@ def finish_circuito(temp_image, imagem_figuras_desenhadas, estado, velocidade):
     leitura_tag(temp_image, imagem_figuras_desenhadas, estado)
 
     if erro != None:
-        velocidade = altera_velociade(velocidade, erro, sin_alfa)
+        velocidade = altera_velociade(velocidade, erro, sin_alfa, estado)
     else:
-        # velocidade.linear.x = 0
-        velocidade.angular.z = 2*vel_ang
+        velocidade.linear.x = 0.1
+        velocidade.angular.z = 3*vel_ang
         pass
 
     return estado, velocidade

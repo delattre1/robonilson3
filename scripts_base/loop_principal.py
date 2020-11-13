@@ -13,7 +13,7 @@ from tf import TransformerROS
 import encontra_centro_massa, leitura_tags
 from encontra_centro_massa import restringir_window_creeper_e_tags, buscar_creeper
 from leitura_tags import encontra_tag_150, verifica_id_creeper
-from pid import encontra_direcao_ate_cm, altera_velociade, altera_velociade_bater_creeper
+from pid import encontra_direcao_ate_cm, altera_velociade
 
 from estados import *
 
@@ -64,7 +64,7 @@ velocidade = Twist(Vector3(vel_lin,0,0), Vector3(0,0, 0))
 tfl = 0
 tf_buffer = tf2_ros.Buffer()
 
-cor_do_creeper     = "blue"    #pink blue vermelho
+cor_do_creeper     = "pink"    #pink blue vermelho
 cor_mascara_pista  = 'amarelo'        
 estado             = "inicializou" 
 
