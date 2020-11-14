@@ -6,10 +6,7 @@ import numpy as np
 from geometry_msgs.msg import Twist, Vector3
 
 str_cor = "amarelo"
-low_threshold=50
-high_threshold=150
-
-x0, y0 = 70, 100
+x0, y0 = 70, 140
 centro_x_tela = 160
 tamanho_tela_y = 240
 

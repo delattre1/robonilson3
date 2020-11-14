@@ -23,11 +23,20 @@ cor_mascara_pista  = 'amarelo'
 estado             = "inicializou" 
 
 from pid2 import encontra_direcao_ate_cm, altera_velociade
+from tags_id import tag_fim_percurso
+
 
 def anda_rapidamente_pista(estado, velocidade, img_bgr_limpa, str_cor, img_bgr_visivel):
     erro_x, tg_alfa = encontra_direcao_ate_cm(img_bgr_limpa, str_cor, img_bgr_visivel)
     velocidade = altera_velociade(velocidade, erro_x, tg_alfa)
-    return velocidade
+    return estado, velocidade
+
+def dar_meia_volta(estado, temp_image, imagem_figuras_desenhadas):
+    is_end_percurso = tag_fim_percurso(temp_image, imagem_figuras_desenhadas)
+    if is_end_percurso:
+        estado = "dar meia volta"
+    return estado
+        
 
 def roda_todo_frame(imagem):
     global estado
@@ -39,7 +48,12 @@ def roda_todo_frame(imagem):
         imagem_figuras_desenhadas = temp_image.copy()
 
         if estado == "inicializou":
-            velocidade = anda_rapidamente_pista(estado, velocidade, temp_image, cor_mascara_pista, imagem_figuras_desenhadas)
+            estado, velocidade = anda_rapidamente_pista(estado, velocidade, temp_image, cor_mascara_pista, imagem_figuras_desenhadas)
+            estado = dar_meia_volta(estado, temp_image, imagem_figuras_desenhadas)
+
+        elif estado == "dar meia volta":
+            velocidade.linear.x = 0
+            velocidade.angular.z = 2.5*vel_ang
 
         cv2.imshow("temp img", imagem_figuras_desenhadas)       
 
