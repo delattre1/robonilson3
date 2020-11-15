@@ -10,6 +10,12 @@ from geometry_msgs.msg import Twist, Vector3, Pose, Vector3Stamped
 from tf import transformations
 from tf import TransformerROS
 
+from move_garra import claw
+
+from pid2 import encontra_direcao_ate_cm, altera_velociade, is_creeper_visible
+from tags_id import should_rotacionar_to_find_creeper, distance_creeper
+
+
 bridge = CvBridge()
 vel_lin = 0.0
 vel_ang = math.pi/15
@@ -18,42 +24,73 @@ velocidade = Twist(Vector3(vel_lin,0,0), Vector3(0,0, vel_ang))
 tfl = 0
 tf_buffer = tf2_ros.Buffer()
 
-cor_do_creeper     = "blue"    #pink blue vermelho
+cor_do_creeper = "blue"    #pink blue vermelho
+creeper_id     = 22        #blue , "pink 13", orange 11
+
 cor_mascara_pista  = 'amarelo'        
 estado             = "inicializou" 
-
-from pid2 import encontra_direcao_ate_cm, altera_velociade
-from tags_id import tag_fim_percurso
-
+claw = claw()
 
 def anda_rapidamente_pista(estado, velocidade, img_bgr_limpa, str_cor, img_bgr_visivel):
     erro_x, tg_alfa = encontra_direcao_ate_cm(img_bgr_limpa, str_cor, img_bgr_visivel)
-    velocidade = altera_velociade(velocidade, erro_x, tg_alfa)
+    velocidade = altera_velociade(velocidade, erro_x, tg_alfa, estado)
     return estado, velocidade
 
-def dar_meia_volta(estado, temp_image, imagem_figuras_desenhadas):
-    is_end_percurso = tag_fim_percurso(temp_image, imagem_figuras_desenhadas)
-    if is_end_percurso:
+def deve_dar_meia_volta(estado, temp_image, imagem_figuras_desenhadas):
+    if  should_rotacionar_to_find_creeper(temp_image, imagem_figuras_desenhadas):
         estado = "dar meia volta"
     return estado
-        
+
+def rodar_until_creeper_located(estado, velocidade, temp_image, imagem_figuras_desenhadas):
+    velocidade.linear.x = 0
+    velocidade.angular.z = -2*vel_ang
+
+    if is_creeper_visible(temp_image, cor_do_creeper, imagem_figuras_desenhadas)[0] != None:
+        estado = "go_to_creeper"
+        velocidade.linear.x = 0
+        velocidade.angular.z = 0
+    return estado, velocidade
 
 def roda_todo_frame(imagem):
     global estado
     global velocidade 
+    # global contador_meia_volta
 
     try:
-        antes = time.clock()
         temp_image = bridge.compressed_imgmsg_to_cv2(imagem, "bgr8")
         imagem_figuras_desenhadas = temp_image.copy()
 
         if estado == "inicializou":
             estado, velocidade = anda_rapidamente_pista(estado, velocidade, temp_image, cor_mascara_pista, imagem_figuras_desenhadas)
-            estado = dar_meia_volta(estado, temp_image, imagem_figuras_desenhadas)
+            estado = deve_dar_meia_volta(estado, temp_image, imagem_figuras_desenhadas)
+            print("ESTADO: {}").format(estado)
 
-        elif estado == "dar meia volta":
+            # contador_meia_volta = 0 
+
+        elif estado == "dar meia volta": #and contador_meia_volta == 0:
+            # contador_meia_volta = 1 #aqui deve rodar até o creeper estar visivel 
+            estado, velocidade = rodar_until_creeper_located(estado, velocidade, temp_image, imagem_figuras_desenhadas)
+            print("ESTADO: {}").format(estado)
+
+        elif estado == "go_to_creeper":
+            #roda func que faz robo ir até o creeper e parar
+            erro_x, tg_alfa = is_creeper_visible(temp_image, cor_do_creeper, imagem_figuras_desenhadas)
+            velocidade = altera_velociade(velocidade, erro_x, tg_alfa, estado)
+            print("ESTADO: {}").format(estado)
+            if distance_creeper(temp_image, imagem_figuras_desenhadas, creeper_id):
+                estado = "capturar creeper"
+
+        elif estado == "capturar creeper":
+            print("ESTADO: {}").format(estado)
+
             velocidade.linear.x = 0
-            velocidade.angular.z = 2.5*vel_ang
+            velocidade.angular.z = 0
+
+            claw.switch_claw_state() #abre 
+            claw.up_arm() #levanta
+            claw.switch_claw_state() #fecha
+            claw.up_arm() #levanta
+            estado = "voltar pra pista"
 
         cv2.imshow("temp img", imagem_figuras_desenhadas)       
 
@@ -61,6 +98,7 @@ def roda_todo_frame(imagem):
     except CvBridgeError as e:
         print('ex', e)
 
+# claw.down_arm()
 
 if __name__=="__main__":
     rospy.init_node("cor")  
@@ -72,6 +110,16 @@ if __name__=="__main__":
 
     try:
         while not rospy.is_shutdown():
+            # if estado == "dar meia volta" and contador_meia_volta == 1:
+            #     velocidade.linear.x = 0
+            #     velocidade.angular.z = 2.5*vel_ang
+            #     velocidade_saida.publish(velocidade)
+            #     tempo_sleep_meia_volta = math.pi/(2.5*vel_ang)
+            #     rospy.sleep(tempo_sleep_meia_volta)
+            #     contador_meia_volta = 2
+            #     estado = "inicializou"
+
+            # else:
             velocidade_saida.publish(velocidade)
             rospy.sleep(0.01)
 

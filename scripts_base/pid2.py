@@ -69,12 +69,29 @@ def encontra_direcao_ate_cm(img_bgr_limpa, str_cor, img_bgr_visivel):
 kp = 0.003 #constante erro
 kd = 10    #constante derivada
 
-def altera_velociade(velocidade_atual, erro_x, tg_alfa):
+def altera_velociade(velocidade_atual, erro_x, tg_alfa, estado):
     if tg_alfa is not None:
-        change_in_velocity = -kp*(erro_x + kd*tg_alfa) + 0.002
+        change_in_velocity = -kp*(erro_x + kd*tg_alfa) + 0.001
         velocidade_atual.angular.z = change_in_velocity #- (velocidade_atual.angular.z*0.1)
-        vel_lin = (.8 - abs(change_in_velocity)) + (1/abs(change_in_velocity))*1e-3
+        if estado == "go_to_creeper":
+            vel_lin = (.3 - abs(change_in_velocity)) #+ (1/abs(change_in_velocity))*1e-3
+        else: 
+            vel_lin = (.8 - abs(change_in_velocity)) #+ (1/abs(change_in_velocity))*1e-3
         print(vel_lin)
+
         velocidade_atual.linear.x  =  vel_lin
     
     return velocidade_atual
+
+def is_creeper_visible(temp_image, color_creeper, imagem_figuras_desenhadas):
+    hsv_low, hsv_high = masks.criar_valores_mascaras(color_creeper)
+    color_mask = filter_color(temp_image, hsv_low, hsv_high)
+
+    try:
+        cm_xy = center_of_mass(color_mask)
+        crosshair(imagem_figuras_desenhadas, cm_xy, 4, (120,44,255))
+        erro_x = (cm_xy[0] - centro_x_tela)
+        tg_alfa = derivada_estrada(cm_xy[0], cm_xy[1])
+        return erro_x, tg_alfa  
+    except:
+        return None, None

@@ -19,8 +19,7 @@ parameters.adaptiveThreshWinSizeMax = 1000
 
 lowest_dist = 1500
 marker_size  = 25 #- [cm]
-id_to_find = 21
-lista_ids_fim_caminho = [50,100,150,200] #50 é o de baixo, 150 é a de cima
+lista_ids_rotacionar = [50,100,150] #50 é o de baixo, 150 é a de cima  -- ,200
 
 def identifica_tag(bgr_img, imagem_figuras_desenhadas):
     try: 
@@ -39,10 +38,19 @@ def identifica_tag(bgr_img, imagem_figuras_desenhadas):
     except:
         return 10000000,None,None
 
-def tag_fim_percurso(temp_image, imagem_figuras_desenhadas):
+def should_rotacionar_to_find_creeper(temp_image, imagem_figuras_desenhadas): #se ver tag fim pista rotaciona pra encontrar creeper 
     menor_distancia, corners, ids = identifica_tag(temp_image, imagem_figuras_desenhadas)
     if ids is not None:
         for numero_tag in ids:
-            if numero_tag[0] in lista_ids_fim_caminho and menor_distancia <= 400:
+            if numero_tag[0] in lista_ids_rotacionar and menor_distancia <= 450:
+                return True
+    return False
+
+def distance_creeper(temp_image, imagem_figuras_desenhadas, creeper_id):  
+    menor_distancia, corners, ids = identifica_tag(temp_image, imagem_figuras_desenhadas)
+    if ids is not None:
+        print(menor_distancia)
+        for numero_tag in ids:
+            if numero_tag[0] == creeper_id and menor_distancia <= 230:
                 return True
     return False
