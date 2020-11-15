@@ -73,11 +73,10 @@ def altera_velociade(velocidade_atual, erro_x, tg_alfa, estado):
     if tg_alfa is not None:
         change_in_velocity = -kp*(erro_x + kd*tg_alfa) + 0.001
         velocidade_atual.angular.z = change_in_velocity #- (velocidade_atual.angular.z*0.1)
+        vel_lin = (.8 - abs(change_in_velocity)) #+ (1/abs(change_in_velocity))*1e-3
+
         if estado == "go_to_creeper":
             vel_lin = (.3 - abs(change_in_velocity)) #+ (1/abs(change_in_velocity))*1e-3
-        else: 
-            vel_lin = (.8 - abs(change_in_velocity)) #+ (1/abs(change_in_velocity))*1e-3
-        print(vel_lin)
 
         velocidade_atual.linear.x  =  vel_lin
     

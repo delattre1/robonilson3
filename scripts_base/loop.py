@@ -28,7 +28,7 @@ cor_do_creeper = "blue"    #pink blue vermelho
 creeper_id     = 22        #blue , "pink 13", orange 11
 
 cor_mascara_pista  = 'amarelo'        
-estado             = "inicializou" 
+estado             = "resetar garra"  #'testegarra' 
 claw = claw()
 
 def anda_rapidamente_pista(estado, velocidade, img_bgr_limpa, str_cor, img_bgr_visivel):
@@ -82,21 +82,32 @@ def roda_todo_frame(imagem):
 
         elif estado == "capturar creeper":
             print("ESTADO: {}").format(estado)
+            estado, velocidade = parar_frente_creeper(estado, velocidade)
 
-            velocidade.linear.x = 0
-            velocidade.angular.z = 0
 
-            claw.switch_claw_state() #abre 
-            claw.up_arm() #levanta
-            claw.switch_claw_state() #fecha
-            claw.up_arm() #levanta
-            estado = "voltar pra pista"
+        elif estado == "voltar pra pista":
+            estado, velocidade = anda_rapidamente_pista(estado, velocidade, temp_image, cor_mascara_pista, imagem_figuras_desenhadas)
 
         cv2.imshow("temp img", imagem_figuras_desenhadas)       
 
         cv2.waitKey(1)
     except CvBridgeError as e:
         print('ex', e)
+
+def parar_frente_creeper(estado, velocidade):
+    vx = velocidade.linear.x 
+    if vx > 0:
+        velocidade.linear.x -= 0.01
+    else:
+        velocidade.linear.x -= 0
+
+
+    velocidade.angular.z = 0
+    return estado, velocidade
+
+def publish_velocidade(publisher, velocidade):
+    publisher.publish(velocidade)
+    rospy.sleep(0.01)
 
 # claw.down_arm()
 
@@ -120,8 +131,52 @@ if __name__=="__main__":
             #     estado = "inicializou"
 
             # else:
-            velocidade_saida.publish(velocidade)
-            rospy.sleep(0.01)
+
+            publish_velocidade(velocidade_saida, velocidade)
+
+            if estado == "resetar garra":
+                claw.publish_bobo()
+                rospy.sleep(1)  
+
+                claw.fecha_garra()
+                rospy.sleep(1)
+
+                claw.abaixa_garra()
+                rospy.sleep(1)
+                estado = "inicializou"
+
+            # if estado == "capturar creeper":
+            #     claw.publish_bobo()
+            #     rospy.sleep(.5)
+
+            #     claw.abre_garra()
+            #     rospy.sleep(.5)
+
+            #     claw.ergue_garra()
+            #     rospy.sleep(.5)
+
+            #     claw.fecha_garra()
+            #     rospy.sleep(.5)
+
+            #     claw.ergue_garra()
+            #     rospy.sleep(.5)
+
+            #     estado = "voltar pra pista"
+            #     vel = Twist(Vector3(0,0,0), Vector3(0,0, vel_ang))
+            #     velocidade_saida.publish(vel)
 
     except rospy.ROSInterruptException:
         print("Ocorreu uma exceção com o rospy")
+
+# def soltar_creeper():
+    # claw.abaixa_garra()
+    # rospy.sleep(1)
+
+    # claw.abre_garra()
+    # rospy.sleep(1)
+
+    # claw.abaixa_garra()
+    # rospy.sleep(1)
+
+    # claw.fecha_garra()
+    # rospy.sleep(1)
