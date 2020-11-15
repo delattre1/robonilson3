@@ -78,11 +78,15 @@ def roda_todo_frame(imagem):
             velocidade = altera_velociade(velocidade, erro_x, tg_alfa, estado)
             print("ESTADO: {}").format(estado)
             if distance_creeper(temp_image, imagem_figuras_desenhadas, creeper_id):
-                estado = "capturar creeper"
+                estado = "parar em frente ao creeper"
+
+        elif estado == "parar em frente ao creeper":
+            print("ESTADO: {}").format(estado)
+            estado, velocidade = parar_frente_creeper(estado, velocidade)
 
         elif estado == "capturar creeper":
             print("ESTADO: {}").format(estado)
-            estado, velocidade = parar_frente_creeper(estado, velocidade)
+            estado, velocidade = captura_creeper(estado, velocidade)
 
 
         elif estado == "voltar pra pista":
@@ -99,15 +103,41 @@ def parar_frente_creeper(estado, velocidade):
     if vx > 0:
         velocidade.linear.x -= 0.01
     else:
-        velocidade.linear.x -= 0
-
+        velocidade.linear.x = 0.01
+        estado = "capturar creeper"
 
     velocidade.angular.z = 0
+
     return estado, velocidade
 
 def publish_velocidade(publisher, velocidade):
     publisher.publish(velocidade)
     rospy.sleep(0.01)
+
+def captura_creeper(estado, velocidade):
+    print("capturando o creeper")
+    claw.publish_bobo()
+    rospy.sleep(.1)
+
+    claw.abre_garra()
+    rospy.sleep(.1)
+
+    claw.ergue_garra()
+    rospy.sleep(.5)
+
+    #dar uma aproximada para pegar
+
+    claw.fecha_garra()
+    rospy.sleep(.5)
+
+    claw.ergue_garra()
+    rospy.sleep(.5)
+
+    velocidade.angular.z = -2*vel_ang
+
+    estado = "voltar pra pista"
+    print("É PRA VOLTAR PELA FUNCAO JÁ ")
+    return estado, velocidade
 
 # claw.down_arm()
 
@@ -131,39 +161,15 @@ if __name__=="__main__":
             #     estado = "inicializou"
 
             # else:
-
             publish_velocidade(velocidade_saida, velocidade)
 
             if estado == "resetar garra":
-                claw.publish_bobo()
-                rospy.sleep(1)  
-
                 claw.fecha_garra()
-                rospy.sleep(1)
+                rospy.sleep(.5)
+                claw.publish_bobo()
+                rospy.sleep(.5)  
 
-                claw.abaixa_garra()
-                rospy.sleep(1)
                 estado = "inicializou"
-
-            # if estado == "capturar creeper":
-            #     claw.publish_bobo()
-            #     rospy.sleep(.5)
-
-            #     claw.abre_garra()
-            #     rospy.sleep(.5)
-
-            #     claw.ergue_garra()
-            #     rospy.sleep(.5)
-
-            #     claw.fecha_garra()
-            #     rospy.sleep(.5)
-
-            #     claw.ergue_garra()
-            #     rospy.sleep(.5)
-
-            #     estado = "voltar pra pista"
-            #     vel = Twist(Vector3(0,0,0), Vector3(0,0, vel_ang))
-            #     velocidade_saida.publish(vel)
 
     except rospy.ROSInterruptException:
         print("Ocorreu uma exceção com o rospy")

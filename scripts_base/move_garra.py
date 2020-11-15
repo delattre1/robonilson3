@@ -19,7 +19,7 @@ class claw:
 
         self.arm_state  = -1
         self.claw_state =  0
-        self.time = 1
+        self.time = .1
 
     def publish_bobo(self):
         self.arm_state  = -1
@@ -27,11 +27,11 @@ class claw:
         
         print("abaixando garra...")
         self.arm_publisher.publish(self.arm_state)
-        rospy.sleep(1)
+        rospy.sleep(.1)
 
         print("fechando garra...")
         self.claw_publisher.publish(self.claw_state)
-        rospy.sleep(1)
+        rospy.sleep(.1)
 
 
 

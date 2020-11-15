@@ -51,6 +51,6 @@ def distance_creeper(temp_image, imagem_figuras_desenhadas, creeper_id):
     if ids is not None:
         print(menor_distancia)
         for numero_tag in ids:
-            if numero_tag[0] == creeper_id and menor_distancia <= 300:
+            if numero_tag[0] == creeper_id and menor_distancia <= 330:
                 return True
     return False
