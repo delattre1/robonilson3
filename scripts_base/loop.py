@@ -7,11 +7,9 @@ from sensor_msgs.msg   import Image, CompressedImage, LaserScan
 from cv_bridge         import CvBridge, CvBridgeError
 from geometry_msgs.msg import Twist, Vector3, Pose, Vector3Stamped
 
-from tf import transformations
-from tf import TransformerROS
+from tf import transformations, TransformerROS
 
 from move_garra import claw
-
 from pid2 import encontra_direcao_ate_cm, altera_velociade, is_creeper_visible
 from tags_id import should_rotacionar_to_find_creeper, distance_creeper
 
@@ -24,12 +22,13 @@ velocidade = Twist(Vector3(vel_lin,0,0), Vector3(0,0, vel_ang))
 tfl = 0
 tf_buffer = tf2_ros.Buffer()
 
-cor_do_creeper = "blue"    #pink blue vermelho
-creeper_id     = 22        #blue , "pink 13", orange 11
+cor_do_creeper = "pink"    #pink blue vermelho
+creeper_id     = 13        #blue , "pink 13", orange 11
 
 cor_mascara_pista  = 'amarelo'        
-estado             = "resetar garra"  #'testegarra' 
+estado             = "ajustar posicao inicial"  #'testegarra' 
 claw = claw()
+tempo_rotacao_inicio = 0.1
 
 def anda_rapidamente_pista(estado, velocidade, img_bgr_limpa, str_cor, img_bgr_visivel):
     erro_x, tg_alfa = encontra_direcao_ate_cm(img_bgr_limpa, str_cor, img_bgr_visivel)
@@ -42,33 +41,49 @@ def deve_dar_meia_volta(estado, temp_image, imagem_figuras_desenhadas):
     return estado
 
 def rodar_until_creeper_located(estado, velocidade, temp_image, imagem_figuras_desenhadas):
-    velocidade.linear.x = 0
+    velocidade.linear.x  = 0
     velocidade.angular.z = -2*vel_ang
 
     if is_creeper_visible(temp_image, cor_do_creeper, imagem_figuras_desenhadas)[0] != None:
         estado = "go_to_creeper"
-        velocidade.linear.x = 0
+        velocidade.linear.x  = 0
         velocidade.angular.z = 0
     return estado, velocidade
+
+def rotacionar_no_inicio(estado, velocidade, cor_do_creeper):
+    vel_z = 2*vel_ang
+    tempo_rotacao_inicio = (math.pi/2)/ vel_z
+
+    if cor_do_creeper == "blue":
+        velocidade.angular.z = +vel_z
+
+    elif cor_do_creeper == "vermelho":
+        velocidade.angular.z = -vel_z
+    return estado, velocidade, tempo_rotacao_inicio
 
 def roda_todo_frame(imagem):
     global estado
     global velocidade 
+    global tempo_rotacao_inicio
     # global contador_meia_volta
 
     try:
         temp_image = bridge.compressed_imgmsg_to_cv2(imagem, "bgr8")
         imagem_figuras_desenhadas = temp_image.copy()
 
+        if estado == "ajustar posicao inicial":
+            if cor_do_creeper == "blue" or cor_do_creeper == "vermelho":
+                estado, velocidade, tempo_rotacao_inicio = rotacionar_no_inicio(estado, velocidade, cor_do_creeper)
+
+            elif cor_do_creeper == "pink":
+                estado = "resetar garra"
+
         if estado == "inicializou":
             estado, velocidade = anda_rapidamente_pista(estado, velocidade, temp_image, cor_mascara_pista, imagem_figuras_desenhadas)
             estado = deve_dar_meia_volta(estado, temp_image, imagem_figuras_desenhadas)
             print("ESTADO: {}").format(estado)
 
-            # contador_meia_volta = 0 
-
-        elif estado == "dar meia volta": #and contador_meia_volta == 0:
-            # contador_meia_volta = 1 #aqui deve rodar até o creeper estar visivel 
+        elif estado == "dar meia volta":
             estado, velocidade = rodar_until_creeper_located(estado, velocidade, temp_image, imagem_figuras_desenhadas)
             print("ESTADO: {}").format(estado)
 
@@ -87,7 +102,6 @@ def roda_todo_frame(imagem):
         elif estado == "capturar creeper":
             print("ESTADO: {}").format(estado)
             estado, velocidade = captura_creeper(estado, velocidade)
-
 
         elif estado == "voltar pra pista":
             estado, velocidade = anda_rapidamente_pista(estado, velocidade, temp_image, cor_mascara_pista, imagem_figuras_desenhadas)
@@ -110,9 +124,17 @@ def parar_frente_creeper(estado, velocidade):
 
     return estado, velocidade
 
-def publish_velocidade(publisher, velocidade):
+def publish_velocidade(publisher, velocidade, estado):
     publisher.publish(velocidade)
-    rospy.sleep(0.01)
+    rospy.sleep(.1)
+    if estado == "ajustar posicao inicial":
+        publisher.publish(velocidade)
+        rospy.sleep(tempo_rotacao_inicio)
+        velocidade.angular.z = 0
+        publisher.publish(velocidade)
+        rospy.sleep(.05)
+    else:
+        rospy.sleep(.05)
 
 def captura_creeper(estado, velocidade):
     print("capturando o creeper")
@@ -125,8 +147,6 @@ def captura_creeper(estado, velocidade):
     claw.ergue_garra()
     rospy.sleep(.5)
 
-    #dar uma aproximada para pegar
-
     claw.fecha_garra()
     rospy.sleep(.5)
 
@@ -136,10 +156,8 @@ def captura_creeper(estado, velocidade):
     velocidade.angular.z = -2*vel_ang
 
     estado = "voltar pra pista"
-    print("É PRA VOLTAR PELA FUNCAO JÁ ")
+    print("É PRA VOLTAR PRA PISTA JÁ ")
     return estado, velocidade
-
-# claw.down_arm()
 
 if __name__=="__main__":
     rospy.init_node("cor")  
@@ -151,24 +169,22 @@ if __name__=="__main__":
 
     try:
         while not rospy.is_shutdown():
-            # if estado == "dar meia volta" and contador_meia_volta == 1:
-            #     velocidade.linear.x = 0
-            #     velocidade.angular.z = 2.5*vel_ang
-            #     velocidade_saida.publish(velocidade)
-            #     tempo_sleep_meia_volta = math.pi/(2.5*vel_ang)
-            #     rospy.sleep(tempo_sleep_meia_volta)
-            #     contador_meia_volta = 2
-            #     estado = "inicializou"
 
-            # else:
-            publish_velocidade(velocidade_saida, velocidade)
+
+            if estado == "ajustar posicao inicial":
+                publish_velocidade(velocidade_saida, velocidade,estado)
+                print("estou ajustando posicao inicial")
+                print(velocidade)
+                # rospy.sleep(tempo_rotacao_inicio)
+                estado = "resetar garra"
+            else:
+                publish_velocidade(velocidade_saida, velocidade, estado)
 
             if estado == "resetar garra":
                 claw.fecha_garra()
                 rospy.sleep(.5)
                 claw.publish_bobo()
                 rospy.sleep(.5)  
-
                 estado = "inicializou"
 
     except rospy.ROSInterruptException:

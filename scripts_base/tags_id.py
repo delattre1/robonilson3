@@ -49,8 +49,7 @@ def should_rotacionar_to_find_creeper(temp_image, imagem_figuras_desenhadas): #s
 def distance_creeper(temp_image, imagem_figuras_desenhadas, creeper_id):  
     menor_distancia, corners, ids = identifica_tag(temp_image, imagem_figuras_desenhadas)
     if ids is not None:
-        print(menor_distancia)
         for numero_tag in ids:
-            if numero_tag[0] == creeper_id and menor_distancia <= 330:
+            if numero_tag[0] == creeper_id and menor_distancia <= 340:
                 return True
     return False
