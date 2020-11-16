@@ -5,7 +5,6 @@ import cv2.aruco as aruco
 import numpy as np 
 import cv2
 
-
 #--- Get the camera calibration path
 calib_path  = "/home/borg/catkin_ws/src/robot202/ros/exemplos202/scripts/"
 camera_matrix   = np.loadtxt(calib_path+'cameraMatrix_raspi.txt', delimiter=',')
@@ -50,6 +49,6 @@ def distance_creeper(temp_image, imagem_figuras_desenhadas, creeper_id):
     menor_distancia, corners, ids = identifica_tag(temp_image, imagem_figuras_desenhadas)
     if ids is not None:
         for numero_tag in ids:
-            if numero_tag[0] == creeper_id and menor_distancia <= 340:
+            if numero_tag[0] == creeper_id and menor_distancia <= 360:
                 return True
     return False

@@ -72,14 +72,14 @@ kd = 10    #constante derivada
 def altera_velociade(velocidade_atual, erro_x, tg_alfa, estado):
     if tg_alfa is not None:
         vel_x_atual = velocidade_atual.linear.x
+        vel_z_atual = velocidade_atual.angular.z
+
         change_in_velocity = -kp*(erro_x + kd*tg_alfa) + 0.001
-        velocidade_atual.angular.z = change_in_velocity #- (velocidade_atual.angular.z*0.1)
-        vel_lin = (.75 - abs(change_in_velocity)) #+ (1/abs(change_in_velocity))*1e-3
-        if vel_x_atual <= vel_lin: #vai acelerando aos poucos
-            vel_lin = vel_x_atual + 0.1*vel_lin + 0.01
+        velocidade_atual.angular.z = change_in_velocity # - (velocidade_atual.angular.z*0.1)
+        vel_lin = (.7 - abs(change_in_velocity))        # + (1/abs(change_in_velocity))*1e-3
 
         if estado == "go_to_creeper":
-            vel_lin = (.3 - abs(change_in_velocity)) #+ (1/abs(change_in_velocity))*1e-3
+            vel_lin = (.3 - abs(change_in_velocity))    #+ (1/abs(change_in_velocity))*1e-3
 
         velocidade_atual.linear.x  =  vel_lin
     
