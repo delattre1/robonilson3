@@ -26,7 +26,7 @@ cor_do_creeper = "pink"    #pink blue vermelho - (ORANGE É o VERMELhO)
 creeper_id     = 13        #blue 22 , "pink 13", orange 11
 
 cor_mascara_pista  = 'amarelo'        
-estado             = "ajustar posicao inicial"  #'testegarra' 
+estado             = "ajustar posicao inicial"  #Teste da garra
 garra = garra()
 
 tempo_rotacao_inicio = 0.1
@@ -59,7 +59,7 @@ def roda_todo_frame(imagem):
             print("ESTADO: {}").format(estado)
 
         elif estado == "go_to_creeper":
-            #roda func que faz robo ir até o creeper e parar
+            #roda Função que faz robô ir até o creeper e parar
             erro_x, tg_alfa = is_creeper_visible(temp_image, cor_do_creeper, imagem_figuras_desenhadas)
             velocidade = altera_velociade(velocidade, erro_x, tg_alfa, estado)
             print("ESTADO: {}").format(estado)
@@ -135,7 +135,7 @@ if __name__=="__main__":
     recebedor = rospy.Subscriber(topico_imagem, CompressedImage, roda_todo_frame, queue_size=4, buff_size = 2**24)
     velocidade_saida = rospy.Publisher("/cmd_vel", Twist, queue_size = 1)
 
-    tfl = tf2_ros.TransformListener(tf_buffer) #conversao do sistema de coordenadas 
+    tfl = tf2_ros.TransformListener(tf_buffer) #Conversão do sistema de coordenadas 
 
     try:
         while not rospy.is_shutdown():
