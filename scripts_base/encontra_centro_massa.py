@@ -51,49 +51,6 @@ def centro_massa_cor(img_bgr_limpa, str_cor, img_bgr_visivel):
     desenha_centro = crosshair(img_bgr_visivel, posicao_centro_massa, 8, (255,0,255))
     return posicao_centro_massa
 
-def direcao_centro_massa_cor_escolhida(img_bgr_limpa, str_cor, img_bgr_visivel):
-    try:
-        cm = centro_massa_cor(img_bgr_limpa, str_cor, img_bgr_visivel)
-        x_centro  = cm[0]
-
-        if x_centro < centro - incerteza:
-            return "virar esquerda"
-        elif x_centro > centro + incerteza:
-            return "virar direita"
-        else:
-            return "seguir reto"
-
-    except:
-        return "perdeu pista"
-
-def movimenta_to_centro_massa(qual_direcao, velocidade_atual, vel_lin, vel_ang):
-    if   qual_direcao == "seguir reto":
-        velocidade_atual.angular.z = 0
-        if velocidade_atual.linear.x <= 0.2:
-            velocidade_atual.linear.x = 0.25
-        if velocidade_atual.linear.x <= 2*vel_lin:
-            velocidade_atual.linear.x += 0.1*vel_lin
-        return velocidade_atual
-
-    elif qual_direcao == "virar direita":
-        velocidade_atual.angular.z = -vel_ang
-        return velocidade_atual
-
-    elif qual_direcao == "virar esquerda":
-        velocidade_atual.angular.z = vel_ang
-        return velocidade_atual
-
-    elif qual_direcao == "perdeu pista":
-        velocidade_atual.linear.x = 0
-        velocidade_atual.angular.z = -3*vel_ang
-        return velocidade_atual
-
-    elif qual_direcao == 'rotate_until_is_creeper_visible':
-        velocidade_atual.linear.x = 0
-        velocidade_atual.angular.z = -3*vel_ang
-        
-        return velocidade_atual
-
 def restringir_window_creeper_e_tags(img_bgr_limpa, list_xo_y0):
     x0 = list_xo_y0[0]
     y0 = list_xo_y0[1]
@@ -117,20 +74,6 @@ def buscar_creeper(img_bgr_limpa, cor_creeper, img_bgr_visivel):
         return is_creeper_visible, posicao_centro_massa_creeper
     except:
         return is_creeper_visible, (0,0)
-
-def move_to_creeper(posicao_centro_massa_creeper):
-    try:
-        x_centro  = posicao_centro_massa_creeper[0]
-
-        if x_centro < centro - incerteza:
-            return "virar esquerda"
-        elif x_centro > centro + incerteza:
-            return "virar direita"
-        else:
-            return "seguir reto"
-
-    except:
-        return "perdeu pista"
 
 
 incerteza = 15
