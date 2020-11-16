@@ -59,7 +59,7 @@ def roda_todo_frame(imagem):
             print("ESTADO: {}").format(estado)
 
         elif estado == "go_to_creeper":
-            #roda Função que faz robô ir até o creeper e parar
+            #roda Função que faz robô ir até o creeper e depois parar
             erro_x, tg_alfa = is_creeper_visible(temp_image, cor_do_creeper, imagem_figuras_desenhadas)
             velocidade = altera_velociade(velocidade, erro_x, tg_alfa, estado)
             print("ESTADO: {}").format(estado)
@@ -117,7 +117,7 @@ def publish_velocidade(publisher, velocidade, estado):
     if estado == "ajustar posicao inicial":
         publisher.publish(velocidade)
         rospy.sleep(tempo_rotacao_inicio)
-        #parar o movimento
+        #Para parar o movimento
         velocidade.angular.z = 0
         publisher.publish(velocidade)
         rospy.sleep(.05)
